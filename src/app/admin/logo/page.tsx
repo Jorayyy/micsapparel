@@ -1,163 +1,110 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 
 export default function AdminLogo() {
-  const [logo, setLogo] = useState("");
-  const [currentLogo, setCurrentLogo] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [preview, setPreview] = useState("");
-
-  async function fetchContent() {
-    try {
-      const res = await fetch("/api/admin/content");
-      if (res.ok) {
-        const data = await res.json();
-        setCurrentLogo(data.business.logo);
-        setLogo(data.business.logo);
-      }
-    } catch (error) {
-      console.error("Failed to fetch content:", error);
-    }
-  }
 
   useEffect(() => {
-    fetchContent();
+    const stored = localStorage.getItem("micsapparel-logo");
+    if (stored) {
+      setLogoUrl(stored);
+    } else {
+      setLogoUrl("https://graph.facebook.com/61575002625239/picture?type=large&width=400");
+    }
   }, []);
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      setMessage("File too large. Maximum 2MB.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setPreview(base64);
-      setLogo(base64);
-    };
-    reader.readAsDataURL(file);
-  }
-
-  async function handleSave() {
+  function handleSave() {
     setSaving(true);
     setMessage("");
 
     try {
-      const res = await fetch("/api/admin/content", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          section: "business",
-          data: { logo },
-        }),
-      });
-
-      if (res.ok) {
-        setMessage("Logo updated successfully!");
-        setCurrentLogo(logo);
-      } else {
-        setMessage("Failed to update logo");
-      }
+      localStorage.setItem("micsapparel-logo", logoUrl);
+      setMessage("Logo updated! Changes appear on the site immediately.");
+      setTimeout(() => setMessage(""), 3000);
     } catch {
-      setMessage("Connection error");
+      setMessage("Error saving logo");
     }
     setSaving(false);
   }
 
   function handleReset() {
-    const fbLogo = "https://graph.facebook.com/61575002625239/picture?type=large&width=400";
-    setLogo(fbLogo);
-    setPreview("");
+    const defaultUrl = "https://graph.facebook.com/61575002625239/picture?type=large&width=400";
+    setLogoUrl(defaultUrl);
+    localStorage.setItem("micsapparel-logo", defaultUrl);
+    setMessage("Logo reset to default");
+    setTimeout(() => setMessage(""), 3000);
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <Link href="/admin" className="text-gray-400 hover:text-white text-sm mb-2 inline-block">
-            &larr; Back to Dashboard
-          </Link>
-          <h1 className="font-oswald text-3xl font-bold text-white">Change Logo</h1>
-        </div>
+    <div>
+      <div className="mb-10">
+        <h1 className="font-oswald text-4xl font-bold text-white uppercase tracking-tight">
+          Logo
+        </h1>
+        <p className="text-gray-500 mt-2">Update the brand logo displayed across the site</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Current Logo */}
-        <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-          <h3 className="font-oswald text-lg font-bold text-white mb-4">Current Logo</h3>
-          <div className="flex items-center gap-6">
+      <div className="grid lg:grid-cols-2 gap-10">
+        {/* Preview */}
+        <div className="bg-[#0a0a0a] border border-white/5 p-8">
+          <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+            Preview
+          </h3>
+          <div className="flex items-center justify-center py-10">
             <img
-              src={currentLogo}
-              alt="Current Logo"
-              className="w-32 h-32 rounded-full object-cover border-2 border-white/10"
+              src={logoUrl}
+              alt="Logo Preview"
+              className="w-32 h-32 rounded-full object-cover ring-2 ring-white/10"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://ui-avatars.com/api/?name=MA&background=fff&color=000&size=200";
+              }}
             />
-            <div>
-              <p className="text-white font-medium">MicsApparel</p>
-              <p className="text-gray-400 text-sm mt-1">
-                {currentLogo.includes("graph.facebook.com")
-                  ? "Facebook profile picture"
-                  : "Custom uploaded logo"}
-              </p>
-            </div>
+          </div>
+          <div className="mt-6 flex items-center gap-2">
+            <img
+              src={logoUrl}
+              alt="Logo Small"
+              className="w-8 h-8 rounded-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://ui-avatars.com/api/?name=MA&background=fff&color=000&size=100";
+              }}
+            />
+            <span className="font-oswald text-sm font-bold tracking-[0.2em] uppercase">
+              MicsApparel
+            </span>
           </div>
         </div>
 
-        {/* Upload New Logo */}
-        <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-          <h3 className="font-oswald text-lg font-bold text-white mb-4">Upload New Logo</h3>
+        {/* Edit */}
+        <div className="bg-[#0a0a0a] border border-white/5 p-8">
+          <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+            Update Logo
+          </h3>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
-                Select image (JPG, PNG, or WebP - Max 2MB)
-              </label>
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleFileSelect}
-                className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[#e94560] file:text-white file:font-semibold hover:file:bg-[#ff6b81] file:cursor-pointer"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">
-                Or enter image URL
+              <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-3">
+                Logo URL
               </label>
               <input
                 type="url"
-                value={logo}
-                onChange={(e) => {
-                  setLogo(e.target.value);
-                  setPreview("");
-                }}
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                className="w-full px-4 py-4 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors placeholder:text-gray-600"
                 placeholder="https://example.com/logo.jpg"
-                className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560] transition-colors"
               />
-            </div>
-
-            {/* Preview */}
-            <div>
-              <p className="text-sm text-gray-400 mb-2">Preview</p>
-              <img
-                src={preview || logo}
-                alt="Logo Preview"
-                className="w-24 h-24 rounded-full object-cover border-2 border-white/10"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "https://graph.facebook.com/61575002625239/picture?type=large";
-                }}
-              />
+              <p className="text-gray-600 text-xs mt-2">
+                Paste a URL to your logo image (JPG, PNG, SVG)
+              </p>
             </div>
 
             {message && (
-              <p className={`text-sm ${message.includes("success") ? "text-green-400" : "text-[#e94560]"}`}>
+              <p className="text-white text-sm bg-white/5 px-4 py-3 border border-white/10">
                 {message}
               </p>
             )}
@@ -165,32 +112,40 @@ export default function AdminLogo() {
             <div className="flex gap-3">
               <button
                 onClick={handleSave}
-                disabled={saving || logo === currentLogo}
-                className="px-6 py-3 bg-gradient-to-r from-[#e94560] to-[#ff6b81] text-white font-oswald font-semibold rounded-lg hover:shadow-lg hover:shadow-[#e94560]/30 transition-all disabled:opacity-50"
+                disabled={saving}
+                className="px-6 py-3 bg-white text-black font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save Logo"}
               </button>
               <button
                 onClick={handleReset}
-                className="px-6 py-3 border border-white/10 text-gray-400 rounded-lg hover:bg-white/5 transition-all"
+                className="px-6 py-3 border border-white/10 text-gray-400 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-white/5 transition-colors"
               >
-                Reset to Facebook
+                Reset to Default
               </button>
+            </div>
+
+            <div className="pt-6 border-t border-white/5">
+              <h4 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-3">
+                Quick Sources
+              </h4>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setLogoUrl("https://graph.facebook.com/61575002625239/picture?type=large&width=400")}
+                  className="block w-full text-left px-4 py-3 bg-black border border-white/5 text-sm text-gray-400 hover:text-white hover:border-white/10 transition-all"
+                >
+                  Facebook Page Photo
+                </button>
+                <button
+                  onClick={() => setLogoUrl("https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=400&bold=true&font=oswald")}
+                  className="block w-full text-left px-4 py-3 bg-black border border-white/5 text-sm text-gray-400 hover:text-white hover:border-white/10 transition-all"
+                >
+                  Generated MA Avatar
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Tips */}
-      <div className="p-6 rounded-2xl bg-[#1a1a2e]/50 border border-white/5">
-        <h3 className="font-oswald text-lg font-bold text-white mb-3">Tips</h3>
-        <ul className="space-y-2 text-gray-400 text-sm">
-          <li>• Use a square image (1:1 ratio) for best results</li>
-          <li>• Recommended size: 400x400px or larger</li>
-          <li>• Supported formats: JPG, PNG, WebP</li>
-          <li>• Maximum file size: 2MB</li>
-          <li>• The logo appears in the navbar, footer, and throughout the site</li>
-        </ul>
       </div>
     </div>
   );

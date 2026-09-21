@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import { business, products, testimonials } from "@/data/business";
+import { useContent } from "@/lib/content-context";
 import ProductImage from "@/components/ProductImage";
 
 export default function Home() {
+  const { business, products, testimonials } = useContent();
+
   return (
     <>
       {/* Hero Section */}
@@ -391,7 +395,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
     </>
   );
 }

@@ -1,319 +1,203 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-
-interface BusinessContent {
-  name: string;
-  tagline: string;
-  description: string;
-  shortDescription: string;
-  motto: string;
-  founded: string;
-  location: {
-    city: string;
-    province: string;
-    country: string;
-    full: string;
-  };
-  contact: {
-    phone: string;
-    phoneRaw: string;
-    email: string | null;
-    messenger: string;
-    facebook: string;
-    tiktok: string;
-    tiktokHandle: string;
-  };
-  hours: {
-    status: string;
-    description: string;
-  };
-  owner: {
-    name: string;
-    title: string;
-  };
-}
+import { business as defaultBusiness, testimonials as defaultTestimonials, faqs as defaultFaqs } from "@/data/business";
 
 export default function AdminContent() {
-  const [content, setContent] = useState<BusinessContent | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<"business" | "testimonials" | "faqs">("business");
   const [message, setMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"general" | "contact" | "about">("general");
 
-  async function fetchContent() {
-    try {
-      const res = await fetch("/api/admin/content");
-      if (res.ok) {
-        const data = await res.json();
-        setContent(data.business);
-      }
-    } catch (error) {
-      console.error("Failed to fetch content:", error);
-    }
-  }
+  const [business, setBusiness] = useState(defaultBusiness);
+  const [testimonials, setTestimonials] = useState(defaultTestimonials);
+  const [faqs, setFaqs] = useState(defaultFaqs);
 
   useEffect(() => {
-    fetchContent();
+    try {
+      const stored = localStorage.getItem("micsapparel-content");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.business) setBusiness({ ...defaultBusiness, ...parsed.business });
+        if (parsed.testimonials) setTestimonials(parsed.testimonials);
+        if (parsed.faqs) setFaqs(parsed.faqs);
+      }
+    } catch {}
   }, []);
 
-  async function handleSave() {
-    if (!content) return;
-    setSaving(true);
-    setMessage("");
-
-    try {
-      const res = await fetch("/api/admin/content", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          section: "business",
-          data: content,
-        }),
-      });
-
-      if (res.ok) {
-        setMessage("Content updated successfully!");
-      } else {
-        setMessage("Failed to update content");
-      }
-    } catch {
-      setMessage("Connection error");
-    }
-    setSaving(false);
-  }
-
-  if (!content) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#e94560] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  function saveContent() {
+    const data = { business, testimonials, faqs };
+    localStorage.setItem("micsapparel-content", JSON.stringify(data));
+    setMessage("Content saved! Changes appear on the site immediately.");
+    setTimeout(() => setMessage(""), 3000);
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <Link href="/admin" className="text-gray-400 hover:text-white text-sm mb-2 inline-block">
-            &larr; Back to Dashboard
-          </Link>
-          <h1 className="font-oswald text-3xl font-bold text-white">Edit Content</h1>
-        </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-6 py-3 bg-gradient-to-r from-[#e94560] to-[#ff6b81] text-white font-oswald font-semibold rounded-lg hover:shadow-lg hover:shadow-[#e94560]/30 transition-all disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save All Changes"}
-        </button>
+    <div>
+      <div className="mb-10">
+        <h1 className="font-oswald text-4xl font-bold text-white uppercase tracking-tight">
+          Content
+        </h1>
+        <p className="text-gray-500 mt-2">Manage business info, testimonials, and FAQs</p>
       </div>
 
-      {message && (
-        <div className={`p-4 rounded-lg ${message.includes("success") ? "bg-green-500/10 text-green-400" : "bg-[#e94560]/10 text-[#e94560]"}`}>
-          {message}
-        </div>
-      )}
-
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-white/5 pb-2">
-        {(["general", "contact", "about"] as const).map((tab) => (
+      <div className="flex items-center gap-1 mb-8 border-b border-white/5">
+        {[
+          { key: "business" as const, label: "Business Info" },
+          { key: "testimonials" as const, label: "Testimonials" },
+          { key: "faqs" as const, label: "FAQs" },
+        ].map((tab) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg font-oswald font-semibold transition-all ${
-              activeTab === tab
-                ? "bg-[#e94560] text-white"
-                : "text-gray-400 hover:text-white hover:bg-white/5"
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-5 py-3 text-[11px] font-bold tracking-[0.2em] uppercase transition-all border-b-2 ${
+              activeTab === tab.key
+                ? "text-white border-white"
+                : "text-gray-500 border-transparent hover:text-white"
             }`}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab.label}
           </button>
         ))}
       </div>
 
-      {/* General Tab */}
-      {activeTab === "general" && (
-        <div className="space-y-6">
-          <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-            <h3 className="font-oswald text-lg font-bold text-white mb-4">Business Info</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Business Name</label>
-                <input
-                  type="text"
-                  value={content.name}
-                  onChange={(e) => setContent({ ...content, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Tagline</label>
-                <input
-                  type="text"
-                  value={content.tagline}
-                  onChange={(e) => setContent({ ...content, tagline: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Motto / Quote</label>
-                <input
-                  type="text"
-                  value={content.motto}
-                  onChange={(e) => setContent({ ...content, motto: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Founded</label>
-                <input
-                  type="text"
-                  value={content.founded}
-                  onChange={(e) => setContent({ ...content, founded: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
-              </div>
-            </div>
-          </div>
+      {message && (
+        <div className="mb-6 px-4 py-3 bg-white/5 border border-white/10 text-white text-sm">
+          {message}
+        </div>
+      )}
 
-          <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-            <h3 className="font-oswald text-lg font-bold text-white mb-4">Owner Info</h3>
+      {/* Business Info */}
+      {activeTab === "business" && (
+        <div className="space-y-6">
+          <div className="bg-[#0a0a0a] border border-white/5 p-6">
+            <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+              Basic Information
+            </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Owner Name</label>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Brand Name
+                </label>
                 <input
                   type="text"
-                  value={content.owner.name}
-                  onChange={(e) => setContent({ ...content, owner: { ...content.owner, name: e.target.value } })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
+                  value={business.name}
+                  onChange={(e) => setBusiness({ ...business, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Title</label>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Founded
+                </label>
                 <input
                   type="text"
-                  value={content.owner.title}
-                  onChange={(e) => setContent({ ...content, owner: { ...content.owner, title: e.target.value } })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
+                  value={business.founded}
+                  onChange={(e) => setBusiness({ ...business, founded: e.target.value })}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
                 />
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Contact Tab */}
-      {activeTab === "contact" && (
-        <div className="space-y-6">
-          <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-            <h3 className="font-oswald text-lg font-bold text-white mb-4">Contact Info</h3>
-            <div className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    value={content.contact.phone}
-                    onChange={(e) => setContent({ ...content, contact: { ...content.contact, phone: e.target.value } })}
-                    className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Phone (raw, for call links)</label>
-                  <input
-                    type="text"
-                    value={content.contact.phoneRaw}
-                    onChange={(e) => setContent({ ...content, contact: { ...content.contact, phoneRaw: e.target.value } })}
-                    className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Email (optional)</label>
-                <input
-                  type="email"
-                  value={content.contact.email || ""}
-                  onChange={(e) => setContent({ ...content, contact: { ...content.contact, email: e.target.value || null } })}
-                  placeholder="your@email.com"
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">TikTok Handle</label>
-                <input
-                  type="text"
-                  value={content.contact.tiktokHandle}
-                  onChange={(e) => setContent({ ...content, contact: { ...content.contact, tiktokHandle: e.target.value } })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
-              </div>
+            <div className="mt-4">
+              <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                Tagline
+              </label>
+              <input
+                type="text"
+                value={business.tagline}
+                onChange={(e) => setBusiness({ ...business, tagline: e.target.value })}
+                className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                Motto
+              </label>
+              <input
+                type="text"
+                value={business.motto}
+                onChange={(e) => setBusiness({ ...business, motto: e.target.value })}
+                className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+              />
+            </div>
+            <div className="mt-4">
+              <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                Description
+              </label>
+              <textarea
+                value={business.description}
+                onChange={(e) => setBusiness({ ...business, description: e.target.value })}
+                rows={4}
+                className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors resize-none"
+              />
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-            <h3 className="font-oswald text-lg font-bold text-white mb-4">Location</h3>
-            <div className="space-y-4">
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">City</label>
-                  <input
-                    type="text"
-                    value={content.location.city}
-                    onChange={(e) => setContent({ ...content, location: { ...content.location, city: e.target.value } })}
-                    className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Province</label>
-                  <input
-                    type="text"
-                    value={content.location.province}
-                    onChange={(e) => setContent({ ...content, location: { ...content.location, province: e.target.value } })}
-                    className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Country</label>
-                  <input
-                    type="text"
-                    value={content.location.country}
-                    onChange={(e) => setContent({ ...content, location: { ...content.location, country: e.target.value } })}
-                    className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Full Address Display</label>
-                <input
-                  type="text"
-                  value={content.location.full}
-                  onChange={(e) => setContent({ ...content, location: { ...content.location, full: e.target.value } })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-            <h3 className="font-oswald text-lg font-bold text-white mb-4">Business Hours</h3>
+          <div className="bg-[#0a0a0a] border border-white/5 p-6">
+            <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+              Contact
+            </h3>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Status</label>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Phone
+                </label>
                 <input
                   type="text"
-                  value={content.hours.status}
-                  onChange={(e) => setContent({ ...content, hours: { ...content.hours, status: e.target.value } })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
+                  value={business.contact.phone}
+                  onChange={(e) => setBusiness({ ...business, contact: { ...business.contact, phone: e.target.value } })}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Description</label>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  TikTok Handle
+                </label>
                 <input
                   type="text"
-                  value={content.hours.description}
-                  onChange={(e) => setContent({ ...content, hours: { ...content.hours, description: e.target.value } })}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
+                  value={business.contact.tiktokHandle}
+                  onChange={(e) => setBusiness({ ...business, contact: { ...business.contact, tiktokHandle: e.target.value } })}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#0a0a0a] border border-white/5 p-6">
+            <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+              Stats
+            </h3>
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Followers
+                </label>
+                <input
+                  type="text"
+                  value={business.stats.followers}
+                  onChange={(e) => setBusiness({ ...business, stats: { ...business.stats, followers: e.target.value } })}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Rating
+                </label>
+                <input
+                  type="text"
+                  value={business.stats.rating}
+                  onChange={(e) => setBusiness({ ...business, stats: { ...business.stats, rating: e.target.value } })}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Years in Business
+                </label>
+                <input
+                  type="text"
+                  value={business.stats.yearsInBusiness}
+                  onChange={(e) => setBusiness({ ...business, stats: { ...business.stats, yearsInBusiness: e.target.value } })}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
                 />
               </div>
             </div>
@@ -321,34 +205,115 @@ export default function AdminContent() {
         </div>
       )}
 
-      {/* About Tab */}
-      {activeTab === "about" && (
-        <div className="space-y-6">
-          <div className="p-6 rounded-2xl bg-[#1a1a2e] border border-white/5">
-            <h3 className="font-oswald text-lg font-bold text-white mb-4">Business Description</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Full Description</label>
-                <textarea
-                  value={content.description}
-                  onChange={(e) => setContent({ ...content, description: e.target.value })}
-                  rows={5}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
-                />
+      {/* Testimonials */}
+      {activeTab === "testimonials" && (
+        <div className="space-y-4">
+          {testimonials.map((t, i) => (
+            <div key={t.id} className="bg-[#0a0a0a] border border-white/5 p-6">
+              <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={t.name}
+                    onChange={(e) => {
+                      const updated = [...testimonials];
+                      updated[i] = { ...t, name: e.target.value };
+                      setTestimonials(updated);
+                    }}
+                    className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                    Source
+                  </label>
+                  <input
+                    type="text"
+                    value={t.source}
+                    onChange={(e) => {
+                      const updated = [...testimonials];
+                      updated[i] = { ...t, source: e.target.value };
+                      setTestimonials(updated);
+                    }}
+                    className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Short Description (for cards/SEO)</label>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Review
+                </label>
                 <textarea
-                  value={content.shortDescription}
-                  onChange={(e) => setContent({ ...content, shortDescription: e.target.value })}
-                  rows={2}
-                  className="w-full px-4 py-3 bg-[#0a0a0f] border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#e94560]"
+                  value={t.text}
+                  onChange={(e) => {
+                    const updated = [...testimonials];
+                    updated[i] = { ...t, text: e.target.value };
+                    setTestimonials(updated);
+                  }}
+                  rows={3}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors resize-none"
                 />
               </div>
             </div>
-          </div>
+          ))}
         </div>
       )}
+
+      {/* FAQs */}
+      {activeTab === "faqs" && (
+        <div className="space-y-4">
+          {faqs.map((faq, i) => (
+            <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6">
+              <div className="mb-4">
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Question
+                </label>
+                <input
+                  type="text"
+                  value={faq.question}
+                  onChange={(e) => {
+                    const updated = [...faqs];
+                    updated[i] = { ...faq, question: e.target.value };
+                    setFaqs(updated);
+                  }}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
+                  Answer
+                </label>
+                <textarea
+                  value={faq.answer}
+                  onChange={(e) => {
+                    const updated = [...faqs];
+                    updated[i] = { ...faq, answer: e.target.value };
+                    setFaqs(updated);
+                  }}
+                  rows={3}
+                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors resize-none"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Save Button */}
+      <div className="mt-8 pt-6 border-t border-white/5">
+        <button
+          onClick={saveContent}
+          className="px-8 py-4 bg-white text-black font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-200 transition-colors"
+        >
+          Save All Changes
+        </button>
+        <p className="text-gray-600 text-xs mt-3">
+          Changes are saved to your browser and reflected on the site immediately.
+        </p>
+      </div>
     </div>
   );
 }

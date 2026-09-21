@@ -6,6 +6,7 @@ export const business = {
   shortDescription:
     "Premium streetwear clothing brand based in Tacloban City, Philippines. Quality caps, hats, and accessories.",
   motto: "WHEN THE TIME IS RIGHT, I. THE LORD WILL MAKE IT HAPPEN. ISAIAH 60:22",
+  mission: "To create premium streetwear that combines faith, fashion, and Filipino pride. Every piece is designed with purpose and built to last.",
   founded: "April 2024",
   logo: "https://graph.facebook.com/61575002625239/picture?type=large&width=400",
   location: {
@@ -22,6 +23,9 @@ export const business = {
     facebook: "https://www.facebook.com/profile.php?id=61575002625239",
     tiktok: "https://www.tiktok.com/@micko.badilla",
     tiktokHandle: "@micko.badilla",
+    address: "Tacloban City, Leyte, Philippines",
+    hours: "24/7 via Messenger",
+    region: "Eastern Visayas",
   },
   hours: {
     status: "Always Open",
@@ -42,6 +46,17 @@ export const business = {
     tiktok: "https://www.tiktok.com/@micko.badilla",
     messenger: "https://m.me/profile.php?id=61575002625239",
   },
+  values: [
+    { title: "Quality", description: "Premium fabrics and meticulous craftsmanship in every piece we create." },
+    { title: "Faith", description: "Driven by purpose and faith. Every design carries meaning." },
+    { title: "Affordability", description: "High-end streetwear that doesn't break the bank." },
+    { title: "Community", description: "Proudly supporting local talent in Tacloban City." },
+  ],
+  milestones: [
+    { year: "Apr 2024", title: "Founded", description: "MicsApparel was born in Tacloban City with a vision for premium streetwear." },
+    { year: "2024", title: "First Collection", description: "Launched our first cap collection featuring Close Cap, Net Cap, and Tracker Cap." },
+    { year: "2025", title: "Growing Community", description: "Reached 400+ followers and established a loyal customer base." },
+  ],
 };
 
 export const products = [
@@ -51,7 +66,7 @@ export const products = [
     price: 350,
     currency: "₱",
     category: "Caps",
-    image: "/images/close-cap.jpg",
+    image: "https://picsum.photos/seed/cap1/600/750",
     description:
       "Premium close-fit cap with the iconic MicsApparel logo. Perfect for everyday streetwear styling.",
     features: ["Premium quality fabric", "Adjustable fit", "Iconic MA logo", "Comfortable wear"],
@@ -64,7 +79,7 @@ export const products = [
     price: 300,
     currency: "₱",
     category: "Caps",
-    image: "/images/net-cap.jpg",
+    image: "https://picsum.photos/seed/cap2/600/750",
     description:
       "Stylish net cap design combining breathability with streetwear aesthetics. Ideal for the Philippine climate.",
     features: ["Breathable mesh back", "Durable construction", "MA branding", "Lightweight design"],
@@ -77,7 +92,7 @@ export const products = [
     price: 300,
     currency: "₱",
     category: "Caps",
-    image: "/images/tracker-cap.jpg",
+    image: "https://picsum.photos/seed/cap3/600/750",
     description:
       "Outdoor-ready tracker cap built for adventure. Rugged style meets urban fashion.",
     features: ["Adventure-ready design", "UV protection", "Quick-dry material", "Versatile styling"],
@@ -90,7 +105,7 @@ export const products = [
     price: 350,
     currency: "₱",
     category: "Caps",
-    image: "/images/snapback.jpg",
+    image: "https://picsum.photos/seed/cap4/600/750",
     description:
       "Timeless snapback silhouette with modern MicsApparel branding. A wardrobe essential.",
     features: ["Classic snapback fit", "Flat brim option", "Premium embroidery", "Unisex design"],
@@ -103,7 +118,7 @@ export const products = [
     price: 280,
     currency: "₱",
     category: "Caps",
-    image: "/images/dad-cap.jpg",
+    image: "https://picsum.photos/seed/cap5/600/750",
     description:
       "Relaxed-fit dad cap for effortless style. Comfortable, casual, and unmistakably MicsApparel.",
     features: ["Relaxed fit", "Soft crown", "Vintage wash", "Adjustable strap"],
@@ -116,7 +131,7 @@ export const products = [
     price: 320,
     currency: "₱",
     category: "Hats",
-    image: "/images/bucket-hat.jpg",
+    image: "https://picsum.photos/seed/hat1/600/750",
     description:
       "Versatile bucket hat perfect for beach days, festivals, or casual streetwear looks.",
     features: ["Wide brim coverage", "Reversible option", "Lightweight fabric", "Packable design"],

@@ -1,54 +1,75 @@
-import { business, products } from "@/data/business";
-import type { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useContent } from "@/lib/content-context";
 import ProductImage from "@/components/ProductImage";
 
-export const metadata: Metadata = {
-  title: "Products",
-  description: `Shop ${business.name} collection of premium streetwear caps, hats, and accessories. Starting at ₱250.`,
-};
+const categories = ["All", "Caps", "Snapbacks", "Dad Caps", "Bucket Hats"];
 
 export default function Products() {
+  const { products } = useContent();
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  const filteredProducts =
+    activeCategory === "All"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
+
   return (
     <>
       {/* Hero */}
-      <section className="pt-32 pb-20 bg-black relative">
+      <section className="pt-32 pb-20 bg-black">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
           <span className="text-[11px] text-gray-500 tracking-[0.3em] uppercase block mb-4">
             Shop
           </span>
-          <h1 className="font-oswald text-[clamp(3rem,8vw,6rem)] font-bold uppercase tracking-tight">
-            All Products
+          <h1 className="font-oswald text-6xl lg:text-8xl font-bold uppercase tracking-tight">
+            Products
           </h1>
-          <p className="text-gray-400 text-lg mt-4 max-w-xl">
-            Premium streetwear designed for the bold. Quality caps and hats starting at just ₱250.
+          <p className="text-gray-400 mt-6 max-w-lg">
+            Premium streetwear crafted in Tacloban City. Each piece is designed with
+            purpose and built to last.
           </p>
         </div>
       </section>
 
       {/* Filter Bar */}
-      <div className="sticky top-20 z-30 bg-black/80 backdrop-blur-xl border-y border-white/5">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-400">{products.length} Products</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-gray-500 tracking-widest uppercase hidden sm:block">
-              Starting at ₱250
-            </span>
+      <section className="sticky top-20 z-30 bg-black/90 backdrop-blur-xl border-y border-white/5">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="flex items-center gap-1 py-4 overflow-x-auto scrollbar-hide">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-5 py-2 text-[13px] font-medium tracking-widest uppercase whitespace-nowrap transition-all ${
+                  activeCategory === cat
+                    ? "bg-white text-black"
+                    : "text-gray-500 hover:text-white"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Products Grid */}
-      <section className="bg-black">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5">
-            {products.map((product) => (
+      <section className="py-20 bg-black">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="mb-8">
+            <p className="text-gray-600 text-sm">
+              {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-1">
+            {filteredProducts.map((product) => (
               <div
                 key={product.id}
-                className="group relative bg-black"
+                className="group relative bg-[#0a0a0a]"
               >
-                {/* Image */}
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <ProductImage
                     src={product.image}
@@ -63,92 +84,70 @@ export default function Products() {
                     </div>
                   )}
 
-                  {/* Quick View Overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-500 flex items-center justify-center">
+                  {/* Price */}
+                  <div className="absolute top-4 right-4 px-3 py-1.5 bg-white text-black text-xs font-bold">
+                    {product.currency}{product.price}
+                  </div>
+
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  {/* Info */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                    <p className="text-[11px] text-gray-400 tracking-widest uppercase mb-1">
+                      {product.category}
+                    </p>
+                    <h3 className="font-oswald text-xl font-bold uppercase">
+                      {product.name}
+                    </h3>
                     <a
-                      href={business.social.messenger}
+                      href={`https://m.me/61575002625239?text=${encodeURIComponent(`Hi! I'm interested in the ${product.name}. Is it still available?`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-8 py-3 bg-white text-black text-xs font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500"
+                      className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-white text-black text-xs font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors"
                     >
-                      Inquire Now
+                      Inquire
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
                     </a>
                   </div>
-                </div>
-
-                {/* Info */}
-                <div className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-[11px] text-gray-500 tracking-widest uppercase mb-1">
-                        {product.category}
-                      </p>
-                      <h3 className="font-oswald text-lg font-bold uppercase tracking-wide">
-                        {product.name}
-                      </h3>
-                    </div>
-                    <span className="font-oswald text-lg font-bold">
-                      {product.currency}{product.price}
-                    </span>
-                  </div>
-
-                  <p className="text-gray-500 text-sm mt-3 line-clamp-2 leading-relaxed">
-                    {product.description}
-                  </p>
-
-                  {/* Features */}
-                  <div className="flex flex-wrap gap-1.5 mt-4">
-                    {product.features.slice(0, 3).map((feature, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-white/5 text-gray-500 text-[10px] tracking-wider uppercase">
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
-
-                  <a
-                    href={business.social.messenger}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full mt-6 py-3 border border-white/10 text-center text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-white hover:border-white/30 transition-all"
-                  >
-                    Order via Messenger
-                  </a>
                 </div>
               </div>
             ))}
           </div>
+
+          {filteredProducts.length === 0 && (
+            <div className="text-center py-32">
+              <p className="font-oswald text-4xl font-bold text-white/10 uppercase">
+                No products found
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Bulk Orders */}
-      <section className="py-32 bg-white">
-        <div className="max-w-4xl mx-auto px-6 lg:px-10 text-center">
-          <span className="text-[11px] text-gray-400 tracking-[0.3em] uppercase block mb-4">
-            Special Orders
+      <section className="py-20 bg-white">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
+          <span className="text-[11px] text-gray-500 tracking-[0.3em] uppercase block mb-4">
+            Custom Orders
           </span>
-          <h2 className="font-oswald text-5xl lg:text-6xl font-bold text-black uppercase tracking-tight mb-6">
-            Bulk & Custom
+          <h2 className="font-oswald text-4xl lg:text-5xl font-bold text-black uppercase tracking-tight mb-6">
+            Bulk Orders Available
           </h2>
-          <p className="text-gray-500 text-lg mb-12 max-w-xl mx-auto">
-            Looking for custom caps for your team, event, or business?
-            We offer special pricing for bulk orders.
+          <p className="text-gray-500 mb-8 max-w-lg mx-auto">
+            Need custom designs or bulk quantities? We offer special pricing for teams,
+            organizations, and resellers.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={business.social.messenger}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-10 py-5 bg-black text-white font-oswald text-sm font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors"
-            >
-              Request a Quote
-            </a>
-            <a
-              href={`tel:${business.contact.phoneRaw}`}
-              className="px-10 py-5 border border-black/20 text-black font-oswald text-sm font-bold tracking-[0.2em] uppercase hover:bg-black/5 transition-colors"
-            >
-              Call {business.contact.phone}
-            </a>
-          </div>
+          <a
+            href="https://m.me/61575002625239?text=Hi! I'm interested in bulk ordering."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white font-oswald text-sm font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors"
+          >
+            Contact for Bulk Orders
+          </a>
         </div>
       </section>
     </>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { business } from "@/data/business";
+import { useContent } from "@/lib/content-context";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -15,6 +15,37 @@ const navLinks = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { business } = useContent();
+  const [logoUrl, setLogoUrl] = useState(business.logo);
+
+  useEffect(() => {
+    // Check localStorage for custom logo
+    const storedLogo = localStorage.getItem("micsapparel-logo");
+    if (storedLogo) {
+      setLogoUrl(storedLogo);
+    }
+
+    // Listen for storage changes
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "micsapparel-logo" && e.newValue) {
+        setLogoUrl(e.newValue);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
+    // Also poll for changes (same-tab updates)
+    const interval = setInterval(() => {
+      const currentLogo = localStorage.getItem("micsapparel-logo");
+      if (currentLogo) {
+        setLogoUrl(currentLogo);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,9 +68,13 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3 group">
               <img
-                src={business.logo}
+                src={logoUrl}
                 alt="MicsApparel"
                 className="w-10 h-10 rounded-full object-cover ring-1 ring-white/10 group-hover:ring-white/30 transition-all"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://ui-avatars.com/api/?name=MA&background=fff&color=000&size=100";
+                }}
               />
               <span className="font-oswald text-xl font-bold tracking-[0.2em] uppercase hidden sm:block">
                 MicsApparel

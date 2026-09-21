@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
-import { business } from "@/data/business";
+import { useContent } from "@/lib/content-context";
 
 export default function Footer() {
+  const { business } = useContent();
+
   return (
     <footer className="bg-black border-t border-white/5">
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
