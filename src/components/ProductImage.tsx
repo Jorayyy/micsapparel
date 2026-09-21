@@ -1,7 +1,5 @@
 "use client";
 
-import { business } from "@/data/business";
-
 interface ProductImageProps {
   src: string;
   alt: string;
