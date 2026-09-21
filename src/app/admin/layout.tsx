@@ -14,7 +14,7 @@ export default function AdminLayout({
 
   async function checkAuth() {
     try {
-      const res = await fetch("/api/admin/content");
+      const res = await fetch("/api/admin/check");
       if (res.ok) {
         setIsAuthenticated(true);
       }
