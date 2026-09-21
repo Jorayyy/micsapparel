@@ -19,13 +19,11 @@ export default function Navbar() {
   const [logoUrl, setLogoUrl] = useState(business.logo);
 
   useEffect(() => {
-    // Check localStorage for custom logo
     const storedLogo = localStorage.getItem("micsapparel-logo");
     if (storedLogo) {
       setLogoUrl(storedLogo);
     }
 
-    // Listen for storage changes
     const handleStorage = (e: StorageEvent) => {
       if (e.key === "micsapparel-logo" && e.newValue) {
         setLogoUrl(e.newValue);
@@ -33,7 +31,6 @@ export default function Navbar() {
     };
     window.addEventListener("storage", handleStorage);
 
-    // Also poll for changes (same-tab updates)
     const interval = setInterval(() => {
       const currentLogo = localStorage.getItem("micsapparel-logo");
       if (currentLogo) {
@@ -60,7 +57,7 @@ export default function Navbar() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? "bg-black/80 backdrop-blur-xl border-b border-white/5"
+            ? "bg-white/90 backdrop-blur-xl border-b border-gray-200"
             : "bg-transparent"
         }`}
       >
@@ -70,13 +67,13 @@ export default function Navbar() {
               <img
                 src={logoUrl}
                 alt="MicsApparel"
-                className="w-10 h-10 rounded-full object-cover ring-1 ring-white/10 group-hover:ring-white/30 transition-all"
+                className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 group-hover:ring-gray-400 transition-all"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = "https://ui-avatars.com/api/?name=MA&background=fff&color=000&size=100";
+                  target.src = "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=100";
                 }}
               />
-              <span className="font-oswald text-xl font-bold tracking-[0.2em] uppercase hidden sm:block">
+              <span className={`font-oswald text-xl font-bold tracking-[0.2em] uppercase hidden sm:block transition-colors ${scrolled ? "text-gray-900" : "text-gray-900"}`}>
                 MicsApparel
               </span>
             </Link>
@@ -86,7 +83,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-5 py-2 text-[13px] font-medium text-gray-400 hover:text-white tracking-widest uppercase transition-colors"
+                  className={`px-5 py-2 text-[13px] font-medium tracking-widest uppercase transition-colors ${scrolled ? "text-gray-500 hover:text-gray-900" : "text-gray-600 hover:text-gray-900"}`}
                 >
                   {link.label}
                 </Link>
@@ -98,7 +95,7 @@ export default function Navbar() {
                 href={business.social.messenger}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-white text-black text-[13px] font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors"
+                className="px-6 py-2.5 bg-gray-900 text-white text-[13px] font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors rounded"
               >
                 Order Now
               </a>
@@ -106,22 +103,22 @@ export default function Navbar() {
 
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 text-white"
+              className="lg:hidden p-2 text-gray-900"
               aria-label="Toggle menu"
             >
               <div className="w-6 h-4 flex flex-col justify-between">
                 <span
-                  className={`w-full h-[1.5px] bg-white transition-all duration-300 ${
+                  className={`w-full h-[1.5px] bg-gray-900 transition-all duration-300 ${
                     isOpen ? "rotate-45 translate-y-[5px]" : ""
                   }`}
                 />
                 <span
-                  className={`w-full h-[1.5px] bg-white transition-all duration-300 ${
+                  className={`w-full h-[1.5px] bg-gray-900 transition-all duration-300 ${
                     isOpen ? "opacity-0" : ""
                   }`}
                 />
                 <span
-                  className={`w-full h-[1.5px] bg-white transition-all duration-300 ${
+                  className={`w-full h-[1.5px] bg-gray-900 transition-all duration-300 ${
                     isOpen ? "-rotate-45 -translate-y-[5px]" : ""
                   }`}
                 />
@@ -133,7 +130,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 z-40 bg-black transition-all duration-500 lg:hidden ${
+        className={`fixed inset-0 z-40 bg-white transition-all duration-500 lg:hidden ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
       >
@@ -143,7 +140,7 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               onClick={() => setIsOpen(false)}
-              className="font-oswald text-5xl font-bold tracking-wider uppercase text-white hover:text-gray-400 transition-colors"
+              className="font-oswald text-5xl font-bold tracking-wider uppercase text-gray-900 hover:text-gray-500 transition-colors"
               style={{
                 transitionDelay: isOpen ? `${i * 80}ms` : "0ms",
                 transform: isOpen ? "translateY(0)" : "translateY(20px)",
@@ -159,7 +156,7 @@ export default function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => setIsOpen(false)}
-            className="mt-4 px-8 py-3 bg-white text-black font-oswald text-lg font-bold tracking-widest uppercase hover:bg-gray-200 transition-colors"
+            className="mt-4 px-8 py-3 bg-gray-900 text-white font-oswald text-lg font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors rounded"
             style={{
               transitionDelay: isOpen ? "400ms" : "0ms",
               transform: isOpen ? "translateY(0)" : "translateY(20px)",

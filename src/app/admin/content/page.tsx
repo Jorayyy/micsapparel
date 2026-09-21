@@ -33,14 +33,14 @@ export default function AdminContent() {
   return (
     <div>
       <div className="mb-10">
-        <h1 className="font-oswald text-4xl font-bold text-white uppercase tracking-tight">
+        <h1 className="font-oswald text-4xl font-bold text-gray-900 uppercase tracking-tight">
           Content
         </h1>
         <p className="text-gray-500 mt-2">Manage business info, testimonials, and FAQs</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 mb-8 border-b border-white/5">
+      <div className="flex items-center gap-1 mb-8 border-b border-gray-200">
         {[
           { key: "business" as const, label: "Business Info" },
           { key: "testimonials" as const, label: "Testimonials" },
@@ -51,8 +51,8 @@ export default function AdminContent() {
             onClick={() => setActiveTab(tab.key)}
             className={`px-5 py-3 text-[11px] font-bold tracking-[0.2em] uppercase transition-all border-b-2 ${
               activeTab === tab.key
-                ? "text-white border-white"
-                : "text-gray-500 border-transparent hover:text-white"
+                ? "text-gray-900 border-black"
+                : "text-gray-400 border-transparent hover:text-gray-700"
             }`}
           >
             {tab.label}
@@ -61,7 +61,7 @@ export default function AdminContent() {
       </div>
 
       {message && (
-        <div className="mb-6 px-4 py-3 bg-white/5 border border-white/10 text-white text-sm">
+        <div className="mb-6 px-4 py-3 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded">
           {message}
         </div>
       )}
@@ -69,8 +69,8 @@ export default function AdminContent() {
       {/* Business Info */}
       {activeTab === "business" && (
         <div className="space-y-6">
-          <div className="bg-[#0a0a0a] border border-white/5 p-6">
-            <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="font-oswald text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-6">
               Basic Information
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -82,7 +82,7 @@ export default function AdminContent() {
                   type="text"
                   value={business.name}
                   onChange={(e) => setBusiness({ ...business, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
               <div>
@@ -93,7 +93,7 @@ export default function AdminContent() {
                   type="text"
                   value={business.founded}
                   onChange={(e) => setBusiness({ ...business, founded: e.target.value })}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
             </div>
@@ -105,7 +105,7 @@ export default function AdminContent() {
                 type="text"
                 value={business.tagline}
                 onChange={(e) => setBusiness({ ...business, tagline: e.target.value })}
-                className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
               />
             </div>
             <div className="mt-4">
@@ -116,7 +116,7 @@ export default function AdminContent() {
                 type="text"
                 value={business.motto}
                 onChange={(e) => setBusiness({ ...business, motto: e.target.value })}
-                className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
               />
             </div>
             <div className="mt-4">
@@ -127,13 +127,13 @@ export default function AdminContent() {
                 value={business.description}
                 onChange={(e) => setBusiness({ ...business, description: e.target.value })}
                 rows={4}
-                className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors resize-none"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors resize-none rounded"
               />
             </div>
           </div>
 
-          <div className="bg-[#0a0a0a] border border-white/5 p-6">
-            <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="font-oswald text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-6">
               Contact
             </h3>
             <div className="grid sm:grid-cols-2 gap-4">
@@ -145,7 +145,7 @@ export default function AdminContent() {
                   type="text"
                   value={business.contact.phone}
                   onChange={(e) => setBusiness({ ...business, contact: { ...business.contact, phone: e.target.value } })}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
               <div>
@@ -156,14 +156,14 @@ export default function AdminContent() {
                   type="text"
                   value={business.contact.tiktokHandle}
                   onChange={(e) => setBusiness({ ...business, contact: { ...business.contact, tiktokHandle: e.target.value } })}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
             </div>
           </div>
 
-          <div className="bg-[#0a0a0a] border border-white/5 p-6">
-            <h3 className="font-oswald text-xs font-bold text-gray-500 tracking-[0.2em] uppercase mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 className="font-oswald text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-6">
               Stats
             </h3>
             <div className="grid sm:grid-cols-3 gap-4">
@@ -175,7 +175,7 @@ export default function AdminContent() {
                   type="text"
                   value={business.stats.followers}
                   onChange={(e) => setBusiness({ ...business, stats: { ...business.stats, followers: e.target.value } })}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
               <div>
@@ -186,7 +186,7 @@ export default function AdminContent() {
                   type="text"
                   value={business.stats.rating}
                   onChange={(e) => setBusiness({ ...business, stats: { ...business.stats, rating: e.target.value } })}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
               <div>
@@ -197,7 +197,7 @@ export default function AdminContent() {
                   type="text"
                   value={business.stats.yearsInBusiness}
                   onChange={(e) => setBusiness({ ...business, stats: { ...business.stats, yearsInBusiness: e.target.value } })}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
             </div>
@@ -209,7 +209,7 @@ export default function AdminContent() {
       {activeTab === "testimonials" && (
         <div className="space-y-4">
           {testimonials.map((t, i) => (
-            <div key={t.id} className="bg-[#0a0a0a] border border-white/5 p-6">
+            <div key={t.id} className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="grid sm:grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
@@ -223,7 +223,7 @@ export default function AdminContent() {
                       updated[i] = { ...t, name: e.target.value };
                       setTestimonials(updated);
                     }}
-                    className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                   />
                 </div>
                 <div>
@@ -238,7 +238,7 @@ export default function AdminContent() {
                       updated[i] = { ...t, source: e.target.value };
                       setTestimonials(updated);
                     }}
-                    className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                   />
                 </div>
               </div>
@@ -254,7 +254,7 @@ export default function AdminContent() {
                     setTestimonials(updated);
                   }}
                   rows={3}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors resize-none rounded"
                 />
               </div>
             </div>
@@ -266,7 +266,7 @@ export default function AdminContent() {
       {activeTab === "faqs" && (
         <div className="space-y-4">
           {faqs.map((faq, i) => (
-            <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6">
+            <div key={i} className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="mb-4">
                 <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-2">
                   Question
@@ -279,7 +279,7 @@ export default function AdminContent() {
                     updated[i] = { ...faq, question: e.target.value };
                     setFaqs(updated);
                   }}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors rounded"
                 />
               </div>
               <div>
@@ -294,7 +294,7 @@ export default function AdminContent() {
                     setFaqs(updated);
                   }}
                   rows={3}
-                  className="w-full px-4 py-3 bg-black border border-white/10 text-white text-sm focus:outline-none focus:border-white/30 transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors resize-none rounded"
                 />
               </div>
             </div>
@@ -303,14 +303,14 @@ export default function AdminContent() {
       )}
 
       {/* Save Button */}
-      <div className="mt-8 pt-6 border-t border-white/5">
+      <div className="mt-8 pt-6 border-t border-gray-200">
         <button
           onClick={saveContent}
-          className="px-8 py-4 bg-white text-black font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-200 transition-colors"
+          className="px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors rounded"
         >
           Save All Changes
         </button>
-        <p className="text-gray-600 text-xs mt-3">
+        <p className="text-gray-400 text-xs mt-3">
           Changes are saved to your browser and reflected on the site immediately.
         </p>
       </div>
