@@ -65,9 +65,11 @@ export default function About() {
               <div className="aspect-[4/5] rounded-3xl bg-gradient-to-br from-[#1a1a2e] to-[#0f3460] p-8 border-glow">
                 <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center">
                   <div className="text-center px-8">
-                    <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-[#e94560] to-[#d4a574] flex items-center justify-center font-oswald text-5xl font-bold text-white mb-6 shadow-2xl shadow-[#e94560]/30">
-                      MA
-                    </div>
+                    <img
+                      src={business.logo}
+                      alt="MicsApparel Logo"
+                      className="w-32 h-32 mx-auto rounded-full object-cover mb-6 shadow-2xl shadow-[#e94560]/30"
+                    />
                     <p className="font-oswald text-2xl font-bold text-white">MICKO BADILLA</p>
                     <p className="text-[#e94560] font-oswald mt-2">CEO & Founder</p>
                     <p className="text-gray-400 text-sm mt-4">Est. {business.founded}</p>

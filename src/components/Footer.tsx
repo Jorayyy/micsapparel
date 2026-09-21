@@ -8,9 +8,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#e94560] to-[#d4a574] flex items-center justify-center font-oswald text-xl font-bold text-white">
-                MA
-              </div>
+              <img
+                src={business.logo}
+                alt="MicsApparel Logo"
+                className="w-12 h-12 rounded-full object-cover"
+              />
               <span className="font-oswald text-2xl font-bold tracking-wider">
                 MICSAPPAREL
               </span>

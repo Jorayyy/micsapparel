@@ -35,9 +35,11 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#e94560] to-[#d4a574] flex items-center justify-center font-oswald text-xl font-bold text-white group-hover:scale-110 transition-transform">
-              MA
-            </div>
+            <img
+              src={business.logo}
+              alt="MicsApparel Logo"
+              className="w-12 h-12 rounded-full object-cover group-hover:scale-110 transition-transform"
+            />
             <span className="font-oswald text-2xl font-bold tracking-wider hidden sm:block">
               MICSAPPAREL
             </span>

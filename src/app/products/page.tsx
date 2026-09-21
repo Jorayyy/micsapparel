@@ -1,5 +1,6 @@
 import { business, products } from "@/data/business";
 import type { Metadata } from "next";
+import ProductImage from "@/components/ProductImage";
 
 export const metadata: Metadata = {
   title: "Products",
@@ -36,16 +37,18 @@ export default function Products() {
                 key={product.id}
                 className="group relative bg-gradient-card rounded-2xl overflow-hidden border border-white/5 hover:border-[#e94560]/30 transition-all hover-glow"
               >
-                <div className="aspect-square bg-gradient-to-br from-[#1a1a2e] to-[#0f3460] flex items-center justify-center relative overflow-hidden">
-                  <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[#e94560]/20 to-[#d4a574]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <span className="font-oswald text-5xl font-bold text-white/50">MA</span>
-                  </div>
+                <div className="aspect-square relative overflow-hidden">
+                  <ProductImage
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full"
+                  />
                   {product.badge && (
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-[#e94560] text-white text-xs font-oswald font-semibold rounded-full">
+                    <div className="absolute top-4 right-4 px-3 py-1 bg-[#e94560] text-white text-xs font-oswald font-semibold rounded-full z-10">
                       {product.badge}
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 z-20">
                     <a
                       href={business.social.messenger}
                       target="_blank"

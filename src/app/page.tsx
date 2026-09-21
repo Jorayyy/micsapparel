@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { business, products, testimonials } from "@/data/business";
+import ProductImage from "@/components/ProductImage";
 
 export default function Home() {
   return (
@@ -14,9 +15,11 @@ export default function Home() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="mb-8">
-            <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-[#e94560] to-[#d4a574] flex items-center justify-center font-oswald text-5xl font-bold text-white mb-8 shadow-2xl shadow-[#e94560]/30">
-              MA
-            </div>
+            <img
+              src={business.logo}
+              alt="MicsApparel Logo"
+              className="w-32 h-32 mx-auto rounded-full object-cover mb-8 shadow-2xl shadow-[#e94560]/30"
+            />
           </div>
 
           <h1 className="font-oswald text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 tracking-tight">
@@ -111,9 +114,11 @@ export default function Home() {
               <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#1a1a2e] to-[#0f3460] p-8 border-glow">
                 <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-40 h-40 mx-auto rounded-full bg-gradient-to-br from-[#e94560] to-[#d4a574] flex items-center justify-center font-oswald text-6xl font-bold text-white mb-6">
-                      MA
-                    </div>
+                    <img
+                      src={business.logo}
+                      alt="MicsApparel Logo"
+                      className="w-40 h-40 mx-auto rounded-full object-cover mb-6 shadow-2xl shadow-[#e94560]/30"
+                    />
                     <p className="font-oswald text-2xl font-bold text-white">MICSAPPAREL</p>
                     <p className="text-gray-400 mt-2">Est. {business.founded}</p>
                   </div>
@@ -143,12 +148,14 @@ export default function Home() {
                 key={product.id}
                 className="group relative bg-gradient-card rounded-2xl overflow-hidden border border-white/5 hover:border-[#e94560]/30 transition-all hover-glow"
               >
-                <div className="aspect-square bg-gradient-to-br from-[#1a1a2e] to-[#0f3460] flex items-center justify-center relative overflow-hidden">
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#e94560]/20 to-[#d4a574]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <span className="font-oswald text-4xl font-bold text-white/50">MA</span>
-                  </div>
+                <div className="aspect-square relative overflow-hidden">
+                  <ProductImage
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full"
+                  />
                   {product.badge && (
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-[#e94560] text-white text-xs font-oswald font-semibold rounded-full">
+                    <div className="absolute top-4 right-4 px-3 py-1 bg-[#e94560] text-white text-xs font-oswald font-semibold rounded-full z-10">
                       {product.badge}
                     </div>
                   )}

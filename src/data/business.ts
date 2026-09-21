@@ -7,6 +7,7 @@ export const business = {
     "Premium streetwear clothing brand based in Tacloban City, Philippines. Quality caps, hats, and accessories.",
   motto: "WHEN THE TIME IS RIGHT, I. THE LORD WILL MAKE IT HAPPEN. ISAIAH 60:22",
   founded: "April 2024",
+  logo: "https://graph.facebook.com/61575002625239/picture?type=large&width=400",
   location: {
     city: "Tacloban City",
     province: "Leyte",
@@ -50,6 +51,7 @@ export const products = [
     price: 350,
     currency: "₱",
     category: "Caps",
+    image: "/images/close-cap.jpg",
     description:
       "Premium close-fit cap with the iconic MicsApparel logo. Perfect for everyday streetwear styling.",
     features: ["Premium quality fabric", "Adjustable fit", "Iconic MA logo", "Comfortable wear"],
@@ -62,6 +64,7 @@ export const products = [
     price: 300,
     currency: "₱",
     category: "Caps",
+    image: "/images/net-cap.jpg",
     description:
       "Stylish net cap design combining breathability with streetwear aesthetics. Ideal for the Philippine climate.",
     features: ["Breathable mesh back", "Durable construction", "MA branding", "Lightweight design"],
@@ -74,6 +77,7 @@ export const products = [
     price: 300,
     currency: "₱",
     category: "Caps",
+    image: "/images/tracker-cap.jpg",
     description:
       "Outdoor-ready tracker cap built for adventure. Rugged style meets urban fashion.",
     features: ["Adventure-ready design", "UV protection", "Quick-dry material", "Versatile styling"],
@@ -86,6 +90,7 @@ export const products = [
     price: 350,
     currency: "₱",
     category: "Caps",
+    image: "/images/snapback.jpg",
     description:
       "Timeless snapback silhouette with modern MicsApparel branding. A wardrobe essential.",
     features: ["Classic snapback fit", "Flat brim option", "Premium embroidery", "Unisex design"],
@@ -98,6 +103,7 @@ export const products = [
     price: 280,
     currency: "₱",
     category: "Caps",
+    image: "/images/dad-cap.jpg",
     description:
       "Relaxed-fit dad cap for effortless style. Comfortable, casual, and unmistakably MicsApparel.",
     features: ["Relaxed fit", "Soft crown", "Vintage wash", "Adjustable strap"],
@@ -110,6 +116,7 @@ export const products = [
     price: 320,
     currency: "₱",
     category: "Hats",
+    image: "/images/bucket-hat.jpg",
     description:
       "Versatile bucket hat perfect for beach days, festivals, or casual streetwear looks.",
     features: ["Wide brim coverage", "Reversible option", "Lightweight fabric", "Packable design"],
