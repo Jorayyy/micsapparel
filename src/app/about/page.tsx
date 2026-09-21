@@ -10,35 +10,33 @@ export default function About() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-32 pb-20 bg-gradient-to-br from-[#0a0a0f] via-[#1a1a2e] to-[#0f3460] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 right-10 w-96 h-96 bg-[#e94560] rounded-full blur-[128px]" />
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-[#e94560] font-oswald text-sm tracking-widest uppercase">
+      <section className="pt-32 pb-20 bg-black">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <span className="text-[11px] text-gray-500 tracking-[0.3em] uppercase block mb-4">
             Our Story
           </span>
-          <h1 className="font-oswald text-5xl sm:text-6xl lg:text-7xl font-bold mt-4 mb-6">
-            About <span className="text-gradient">MicsApparel</span>
+          <h1 className="font-oswald text-[clamp(3rem,8vw,6rem)] font-bold uppercase tracking-tight">
+            About
+            <br />
+            MicsApparel
           </h1>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Born from faith, built with passion. Discover the story behind Tacloban City&apos;s premium streetwear brand.
-          </p>
         </div>
       </section>
 
       {/* Story */}
-      <section className="py-24 bg-[#0a0a0f]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <span className="text-[#e94560] font-oswald text-sm tracking-widest uppercase">
+      <section className="py-32 bg-[#0a0a0a]">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div className="space-y-8">
+              <span className="text-[11px] text-gray-500 tracking-[0.3em] uppercase block">
                 The Beginning
               </span>
-              <h2 className="font-oswald text-4xl font-bold mt-4 mb-6">
-                A Vision Born in <span className="text-gradient">Tacloban City</span>
+              <h2 className="font-oswald text-4xl lg:text-5xl font-bold uppercase tracking-tight leading-[0.95]">
+                A Vision Born
+                <br />
+                in Tacloban
               </h2>
-              <div className="space-y-4 text-gray-400 leading-relaxed">
+              <div className="space-y-6 text-gray-400 leading-relaxed">
                 <p>
                   MicsApparel was founded in April 2024 with a simple yet powerful vision:
                   to bring premium streetwear fashion to Tacloban City and the Philippines.
@@ -48,10 +46,9 @@ export default function About() {
                 <p>
                   Founded by Micko Badilla, MicsApparel represents more than just clothing —
                   it embodies a lifestyle of faith, determination, and authentic Filipino style.
-                  Our motto, inspired by Isaiah 60:22, drives everything we do:
                 </p>
-                <p className="text-[#e94560] italic text-lg font-medium">
-                  &ldquo;WHEN THE TIME IS RIGHT, I. THE LORD WILL MAKE IT HAPPEN.&rdquo;
+                <p className="text-white italic text-lg font-medium border-l-2 border-white pl-6">
+                  &ldquo;WHEN THE TIME IS RIGHT, I. THE LORD WILL MAKE IT HAPPEN. ISAIAH 60:22&rdquo;
                 </p>
                 <p>
                   From humble beginnings in Tacloban City, we&apos;ve grown to serve customers
@@ -61,81 +58,78 @@ export default function About() {
               </div>
             </div>
 
-            <div className="relative">
-              <div className="aspect-[4/5] rounded-3xl bg-gradient-to-br from-[#1a1a2e] to-[#0f3460] p-8 border-glow">
-                <div className="w-full h-full rounded-2xl bg-[#0a0a0f] flex items-center justify-center">
-                  <div className="text-center px-8">
-                    <img
-                      src={business.logo}
-                      alt="MicsApparel Logo"
-                      className="w-32 h-32 mx-auto rounded-full object-cover mb-6 shadow-2xl shadow-[#e94560]/30"
-                    />
-                    <p className="font-oswald text-2xl font-bold text-white">MICKO BADILLA</p>
-                    <p className="text-[#e94560] font-oswald mt-2">CEO & Founder</p>
-                    <p className="text-gray-400 text-sm mt-4">Est. {business.founded}</p>
-                  </div>
-                </div>
+            <div className="relative aspect-[4/5] bg-[#111]">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img
+                  src={business.logo}
+                  alt="MicsApparel"
+                  className="w-40 h-40 rounded-full object-cover opacity-60"
+                />
               </div>
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-[#d4a574] rounded-2xl -z-10" />
+              <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black to-transparent">
+                <p className="font-oswald text-3xl font-bold uppercase">Micko Badilla</p>
+                <p className="text-gray-400 text-sm tracking-widest uppercase mt-2">
+                  CEO & Founder
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Values */}
-      <section className="py-24 bg-[#1a1a2e]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-[#e94560] font-oswald text-sm tracking-widest uppercase">
-              Our Values
+      <section className="py-32 bg-black border-t border-white/5">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="text-center mb-20">
+            <span className="text-[11px] text-gray-500 tracking-[0.3em] uppercase block mb-4">
+              Values
             </span>
-            <h2 className="font-oswald text-4xl sm:text-5xl font-bold mt-4">
+            <h2 className="font-oswald text-5xl lg:text-6xl font-bold uppercase tracking-tight">
               What We Stand For
             </h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5">
             {[
               {
+                num: "01",
                 title: "Faith-Driven",
-                desc: "Every design, every stitch is infused with purpose. Our faith guides our journey and inspires our craft.",
-                icon: "♥",
+                desc: "Every design, every stitch is infused with purpose. Our faith guides our journey.",
               },
               {
+                num: "02",
                 title: "Quality First",
-                desc: "We never compromise on quality. Premium materials and meticulous craftsmanship define every MicsApparel product.",
-                icon: "★",
+                desc: "Premium materials and meticulous craftsmanship define every product.",
               },
               {
+                num: "03",
                 title: "Authenticity",
-                desc: "Real streetwear for real people. No pretense, no shortcuts — just genuine style that speaks for itself.",
-                icon: "✦",
+                desc: "Real streetwear for real people. No pretense, no shortcuts.",
               },
               {
+                num: "04",
                 title: "Community",
-                desc: "We're more than a brand — we're a family. Building connections and uplifting the Filipino streetwear community.",
-                icon: "◈",
+                desc: "We're more than a brand — we're a family. Building connections.",
               },
               {
+                num: "05",
                 title: "Affordability",
-                desc: "Premium fashion should be accessible. We offer high-quality streetwear at prices that don't break the bank.",
-                icon: "₱",
+                desc: "Premium fashion should be accessible. Quality at fair prices.",
               },
               {
-                title: "Pride in Heritage",
-                desc: "Proudly Filipino, born in Tacloban City. We celebrate our roots and showcase Filipino talent to the world.",
-                icon: "★",
+                num: "06",
+                title: "Heritage",
+                desc: "Proudly Filipino, born in Tacloban. Celebrating our roots.",
               },
-            ].map((value, index) => (
-              <div
-                key={index}
-                className="p-8 rounded-2xl bg-[#0a0a0f] border border-white/5 hover:border-[#e94560]/20 transition-all group"
-              >
-                <div className="w-14 h-14 rounded-xl bg-[#e94560]/10 flex items-center justify-center text-xl text-[#e94560] mb-6 group-hover:bg-[#e94560] group-hover:text-white transition-all">
-                  {value.icon}
-                </div>
-                <h3 className="font-oswald text-xl font-bold text-white mb-3">{value.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{value.desc}</p>
+            ].map((value) => (
+              <div key={value.num} className="p-10 bg-black group hover:bg-[#0a0a0a] transition-colors">
+                <span className="font-oswald text-5xl font-bold text-white/10 group-hover:text-white/20 transition-colors">
+                  {value.num}
+                </span>
+                <h3 className="font-oswald text-xl font-bold uppercase mt-6 mb-4">
+                  {value.title}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{value.desc}</p>
               </div>
             ))}
           </div>
@@ -143,18 +137,18 @@ export default function About() {
       </section>
 
       {/* Timeline */}
-      <section className="py-24 bg-[#0a0a0f]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="text-[#e94560] font-oswald text-sm tracking-widest uppercase">
-              Our Journey
+      <section className="py-32 bg-[#0a0a0a]">
+        <div className="max-w-3xl mx-auto px-6 lg:px-10">
+          <div className="text-center mb-20">
+            <span className="text-[11px] text-gray-500 tracking-[0.3em] uppercase block mb-4">
+              Journey
             </span>
-            <h2 className="font-oswald text-4xl sm:text-5xl font-bold mt-4">
+            <h2 className="font-oswald text-5xl font-bold uppercase tracking-tight">
               Milestones
             </h2>
           </div>
 
-          <div className="space-y-12">
+          <div className="space-y-0">
             {[
               {
                 date: "April 2024",
@@ -163,33 +157,29 @@ export default function About() {
               },
               {
                 date: "2024",
-                title: "First Collection Launch",
-                desc: "Launch of our debut cap collection featuring Close Cap, Net Cap, and Tracker Cap designs.",
+                title: "First Collection",
+                desc: "Launch of our debut cap collection featuring Close Cap, Net Cap, and Tracker Cap.",
               },
               {
                 date: "2025",
                 title: "Growing Community",
-                desc: "Surpass 400+ followers with a 100% customer recommendation rate. Expanding product line.",
+                desc: "Surpass 400+ followers with a 100% customer recommendation rate.",
               },
               {
                 date: "Present",
-                title: "Expanding Horizons",
-                desc: "Serving customers nationwide across the Philippines with plans for new designs and collections.",
+                title: "Expanding",
+                desc: "Serving customers nationwide with plans for new designs and collections.",
               },
             ].map((milestone, index) => (
-              <div key={index} className="flex gap-6 items-start">
-                <div className="flex flex-col items-center">
-                  <div className="w-4 h-4 rounded-full bg-[#e94560] shadow-lg shadow-[#e94560]/30" />
-                  {index < 3 && <div className="w-0.5 h-16 bg-white/10 mt-2" />}
-                </div>
-                <div className="pb-8">
-                  <span className="text-[#e94560] font-oswald text-sm tracking-wider">
-                    {milestone.date}
-                  </span>
-                  <h3 className="font-oswald text-2xl font-bold text-white mt-1">
+              <div key={index} className="flex gap-8 items-start py-8 border-t border-white/5">
+                <span className="font-oswald text-sm text-gray-500 tracking-widest uppercase w-32 flex-shrink-0 pt-1">
+                  {milestone.date}
+                </span>
+                <div>
+                  <h3 className="font-oswald text-xl font-bold uppercase mb-2">
                     {milestone.title}
                   </h3>
-                  <p className="text-gray-400 mt-2 leading-relaxed">{milestone.desc}</p>
+                  <p className="text-gray-500 leading-relaxed">{milestone.desc}</p>
                 </div>
               </div>
             ))}
