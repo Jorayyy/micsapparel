@@ -36,6 +36,8 @@ export default function ProductImage({
         fill
         sizes={sizes}
         priority={priority}
+        quality={90}
+        unoptimized={src.startsWith("data:")}
         className="object-cover transition-transform duration-700 group-hover:scale-105"
         onError={(e) => {
           const target = e.currentTarget as HTMLImageElement;

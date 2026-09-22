@@ -1,17 +1,19 @@
-const ALLOWED_HOSTS = new Set([
-  "picsum.photos",
-  "graph.facebook.com",
-  "ui-avatars.com",
-  "images.unsplash.com",
+const BLOCKED_PAGE_HOSTS = new Set([
+  "facebook.com",
+  "www.facebook.com",
+  "m.facebook.com",
+  "web.facebook.com",
+  "instagram.com",
+  "www.instagram.com",
 ]);
-
-const ALLOWED_SUFFIXES = [".fbcdn.net"];
 
 export function isValidImageUrl(raw: string): boolean {
   const url = raw.trim();
   if (!url) return false;
 
   if (url.startsWith("/") && !url.startsWith("//")) return true;
+
+  if (url.startsWith("data:image/")) return true;
 
   let parsed: URL;
   try {
@@ -23,9 +25,10 @@ export function isValidImageUrl(raw: string): boolean {
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
 
   const host = parsed.hostname.toLowerCase();
-  if (ALLOWED_HOSTS.has(host)) return true;
-  return ALLOWED_SUFFIXES.some((suffix) => host.endsWith(suffix));
+  if (BLOCKED_PAGE_HOSTS.has(host)) return false;
+
+  return true;
 }
 
 export const imageUrlHint =
-  "Paste a direct image link (https://…jpg/.png from an allowed host) or use Upload. Facebook post/page links are not images.";
+  "Paste a direct image link (https://…jpg/.png). Facebook/Instagram post or page links are not images — use Upload instead.";

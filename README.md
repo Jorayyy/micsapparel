@@ -15,10 +15,9 @@ file store is legacy only.
 npm run migrate:neon
 ```
 
-Image URL rules: product image fields accept local paths (`/images/...`) or direct
-image URLs from hosts allowed in `next.config.ts` (`picsum.photos`,
-`graph.facebook.com`, `images.unsplash.com`, `ui-avatars.com`, `*.fbcdn.net`).
-Facebook post/page links are not images and are rejected.
+Image URL rules: product image fields accept local paths (`/images/...`) or any
+direct `http(s)` image URL. Facebook/Instagram **post or page** links are not
+images and are rejected — use Upload for those photos.
 
 ## Getting Started
 
