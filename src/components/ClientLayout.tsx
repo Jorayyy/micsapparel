@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { ContentProvider } from "@/lib/content-context";
 import { CartProvider } from "@/lib/cart-context";
 import Navbar from "@/components/Navbar";
@@ -17,14 +18,27 @@ export default function ClientLayout({
   faqs: Faq[];
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
+
   return (
     <ContentProvider business={business} faqs={faqs}>
       <CartProvider>
-        <Navbar />
-        <main className="min-h-screen pt-16 lg:pt-20 pb-16 lg:pb-0">{children}</main>
-        <Footer />
-        <CartDrawer />
-        <MessengerChat />
+        {!isAdmin && <Navbar />}
+        <main
+          className={
+            isAdmin ? "min-h-screen" : "min-h-screen pt-16 lg:pt-20 pb-16 lg:pb-0"
+          }
+        >
+          {children}
+        </main>
+        {!isAdmin && (
+          <>
+            <Footer />
+            <CartDrawer />
+            <MessengerChat />
+          </>
+        )}
       </CartProvider>
     </ContentProvider>
   );
