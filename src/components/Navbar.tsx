@@ -108,8 +108,8 @@ export default function Navbar() {
                 className="w-9 h-9 rounded-full object-cover ring-1 ring-neutral-200 group-hover:ring-black transition-all"
                 onError={(e) => {
                   const target = e.currentTarget as HTMLImageElement;
-                  target.src =
-                    "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=100";
+                  if (target.src.endsWith("/logo.svg")) return;
+                  target.src = "/logo.svg";
                 }}
               />
               <span className="font-oswald text-lg font-bold tracking-[0.18em] uppercase hidden sm:block">

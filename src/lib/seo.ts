@@ -8,7 +8,9 @@ export function organizationJsonLd(business: Business) {
     name: business.name,
     description: business.shortDescription,
     url: SITE_URL,
-    logo: business.logo,
+    logo: business.logo.startsWith("http")
+      ? business.logo
+      : `${SITE_URL}${business.logo.startsWith("/") ? "" : "/"}${business.logo}`,
     telephone: business.contact.phone,
     address: {
       "@type": "PostalAddress",

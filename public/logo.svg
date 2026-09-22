@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="MicsApparel">
+  <rect width="400" height="400" fill="#000"/>
+  <text
+    x="200"
+    y="248"
+    text-anchor="middle"
+    font-family="Arial Black, Arial, Helvetica, sans-serif"
+    font-size="200"
+    font-weight="900"
+    fill="#fff"
+    letter-spacing="-8"
+  >MA</text>
+</svg>

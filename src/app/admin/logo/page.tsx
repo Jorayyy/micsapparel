@@ -47,8 +47,7 @@ export default function AdminLogo() {
     setSaving(false);
   }
 
-  const DEFAULT_LOGO =
-    "https://graph.facebook.com/61575002625239/picture?type=large&width=400";
+  const DEFAULT_LOGO = "/logo.svg";
 
   return (
     <div>
@@ -155,7 +154,7 @@ export default function AdminLogo() {
                 onClick={() => setLogoUrl(DEFAULT_LOGO)}
                 className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
               >
-                Facebook Page Photo
+                Facebook Page Photo (often a gray silhouette)
               </button>
               <button
                 type="button"

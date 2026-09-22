@@ -48,7 +48,7 @@ export const metadata: Metadata = {
       "Premium streetwear clothing brand based in Tacloban City, Philippines. Shop caps, hats, and streetwear accessories.",
     images: [
       {
-        url: "https://graph.facebook.com/61575002625239/picture?type=large&width=1200",
+        url: `${SITE_URL}/logo.svg`,
         width: 1200,
         height: 630,
         alt: "MicsApparel - Premium Streetwear",
@@ -60,9 +60,7 @@ export const metadata: Metadata = {
     title: "MicsApparel | Premium Streetwear from Tacloban City",
     description:
       "Premium streetwear clothing brand based in Tacloban City, Philippines.",
-    images: [
-      "https://graph.facebook.com/61575002625239/picture?type=large&width=1200",
-    ],
+    images: [`${SITE_URL}/logo.svg`],
   },
   robots: {
     index: true,

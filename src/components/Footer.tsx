@@ -19,8 +19,8 @@ export default function Footer() {
                 className="w-10 h-10 rounded-full object-cover ring-1 ring-neutral-200"
                 onError={(e) => {
                   const target = e.currentTarget as HTMLImageElement;
-                  target.src =
-                    "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=100";
+                  if (target.src.endsWith("/logo.svg")) return;
+                  target.src = "/logo.svg";
                 }}
               />
               <span className="font-oswald text-xl font-bold tracking-[0.18em] uppercase">

@@ -11,7 +11,7 @@ export default function SafeImg({
   src,
   alt,
   className = "",
-  fallback = "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=400",
+  fallback = "/logo.svg",
 }: SafeImgProps) {
   return (
     // eslint-disable-next-line @next/next/no-img-element

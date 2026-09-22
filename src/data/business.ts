@@ -13,7 +13,7 @@ export const business: Business = {
   mission:
     "To create premium streetwear that combines faith, fashion, and Filipino pride. Every piece is designed with purpose and built to last.",
   founded: "April 2024",
-  logo: "https://graph.facebook.com/61575002625239/picture?type=large&width=400",
+  logo: "/logo.svg",
   location: {
     city: "Tacloban City",
     province: "Leyte",
