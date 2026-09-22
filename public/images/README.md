@@ -13,10 +13,12 @@ Drop your product photos here with these exact names:
 | `dad-cap.jpg` | Dad Cap (₱280) |
 | `bucket-hat.jpg` | Bucket Hat (₱320) |
 
+`.jpeg`, `.png`, and `.webp` also work.
+
 ## Tips
 
-- Use **square** images (1:1 ratio) for best results
-- Recommended size: **800x800px** or larger
+- Use **portrait** images (4:5 ratio) for best results on product cards
+- Recommended size: **1200x1500px** or larger
 - Format: **JPG** or **PNG**
 - Keep file sizes under **500KB** for fast loading
 
@@ -27,4 +29,8 @@ Drop your product photos here with these exact names:
 3. Drop them in this folder
 4. Commit and push to GitHub — the site auto-updates!
 
-The website will automatically show your real product photos instead of the MA logo placeholders.
+The website automatically prefers these local files over the placeholder images.
+
+Alternatively, use the admin **Media** page (`/admin/media`) to upload images and paste
+their URLs into product image fields. Note: admin uploads live in `.data/uploads` and reset
+on redeploy on serverless hosts, so `public/images` is the more durable option.

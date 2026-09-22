@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://micsapparel.com/sitemap.xml

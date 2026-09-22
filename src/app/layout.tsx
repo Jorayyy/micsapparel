@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
+import { getBusiness } from "@/lib/store";
+import { SITE_URL } from "@/lib/site";
+import { organizationJsonLd } from "@/lib/seo";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -14,7 +17,7 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://micsapparel.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "MicsApparel | Premium Streetwear from Tacloban City",
     template: "%s | MicsApparel",
@@ -38,14 +41,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_PH",
-    url: "https://micsapparel.com",
+    url: SITE_URL,
     siteName: "MicsApparel",
     title: "MicsApparel | Premium Streetwear from Tacloban City",
     description:
       "Premium streetwear clothing brand based in Tacloban City, Philippines. Shop caps, hats, and streetwear accessories.",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "https://graph.facebook.com/61575002625239/picture?type=large&width=1200",
         width: 1200,
         height: 630,
         alt: "MicsApparel - Premium Streetwear",
@@ -57,7 +60,9 @@ export const metadata: Metadata = {
     title: "MicsApparel | Premium Streetwear from Tacloban City",
     description:
       "Premium streetwear clothing brand based in Tacloban City, Philippines.",
-    images: ["/og-image.jpg"],
+    images: [
+      "https://graph.facebook.com/61575002625239/picture?type=large&width=1200",
+    ],
   },
   robots: {
     index: true,
@@ -77,57 +82,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const business = getBusiness();
+
   return (
     <html lang="en">
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ClothingStore",
-              name: "MicsApparel",
-              description:
-                "Premium streetwear clothing brand based in Tacloban City, Philippines",
-              url: "https://micsapparel.com",
-              telephone: "+639926853803",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Tacloban City",
-                addressRegion: "Leyte",
-                addressCountry: "PH",
-              },
-              geo: {
-                "@type": "GeoCoordinates",
-                latitude: 11.2497,
-                longitude: 125.0024,
-              },
-              openingHoursSpecification: {
-                "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ],
-                opens: "00:00",
-                closes: "23:59",
-              },
-              sameAs: [
-                "https://www.facebook.com/profile.php?id=61575002625239",
-                "https://www.tiktok.com/@micko.badilla",
-              ],
-            }),
+            __html: JSON.stringify(organizationJsonLd(business)),
           }}
         />
       </head>
-      <body
-        className={`${inter.variable} ${oswald.variable} font-sans antialiased`}
-      >
-        <ClientLayout>{children}</ClientLayout>
+      <body className={`${inter.variable} ${oswald.variable} font-sans antialiased`}>
+        <ClientLayout business={business}>{children}</ClientLayout>
       </body>
     </html>
   );

@@ -1,41 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getContent, updateBusiness, updateProducts, updateTestimonials, updateFaqs } from "@/lib/content-store";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { isAdminAuthenticated, isSameOrigin } from "@/lib/admin-auth";
+import {
+  getBusiness,
+  getFaqs,
+  getReviews,
+  setFaqs,
+  updateBusiness,
+  upsertReview,
+} from "@/lib/store";
+import type { Business, Faq, Review } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const content = getContent();
-  return NextResponse.json(content);
+  return NextResponse.json({
+    business: getBusiness(),
+    faqs: getFaqs(),
+    reviews: getReviews({ includeHidden: true }),
+  });
 }
 
 export async function PUT(request: NextRequest) {
-  const authenticated = await isAdminAuthenticated();
-  if (!authenticated) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
   }
 
   try {
     const body = await request.json();
-    const { section, data } = body;
+    const { section, data } = body as {
+      section?: string;
+      data?: unknown;
+    };
 
     switch (section) {
-      case "business":
-        updateBusiness(data);
+      case "business": {
+        const patch = data as Partial<Business>;
+        updateBusiness(patch);
         break;
-      case "products":
-        updateProducts(data);
+      }
+      case "faqs": {
+        if (!Array.isArray(data)) throw new Error("Invalid FAQs");
+        setFaqs(data as Faq[]);
         break;
-      case "testimonials":
-        updateTestimonials(data);
+      }
+      case "reviews": {
+        if (!data || typeof data !== "object") throw new Error("Invalid review");
+        upsertReview(data as Review);
         break;
-      case "faqs":
-        updateFaqs(data);
-        break;
+      }
       default:
         return NextResponse.json({ error: "Invalid section" }, { status: 400 });
     }
 
-    const content = getContent();
-    return NextResponse.json(content);
+    return NextResponse.json({
+      business: getBusiness(),
+      faqs: getFaqs(),
+      reviews: getReviews({ includeHidden: true }),
+    });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

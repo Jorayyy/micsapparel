@@ -1,150 +1,59 @@
-"use client";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import ShopBrowser from "@/components/ShopBrowser";
+import { getCategories, getProducts } from "@/lib/store";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useContent } from "@/lib/content-context";
-import ProductImage from "@/components/ProductImage";
+export const dynamic = "force-dynamic";
 
-const categories = ["All", "Caps", "Snapbacks", "Dad Caps", "Bucket Hats"];
+export const metadata: Metadata = {
+  title: "Shop",
+  description:
+    "Browse MicsApparel caps, hats, and streetwear accessories. Premium quality from Tacloban City, Philippines.",
+  alternates: { canonical: "/products" },
+};
 
-export default function Products() {
-  const { products } = useContent();
-  const [activeCategory, setActiveCategory] = useState("All");
-
-  const filteredProducts =
-    activeCategory === "All"
-      ? products
-      : products.filter((p) => p.category === activeCategory);
+export default async function ProductsPage() {
+  const products = getProducts();
+  const categories = getCategories();
 
   return (
     <>
-      {/* Hero */}
-      <section className="pt-32 pb-20 bg-white">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <span className="text-[11px] text-gray-400 tracking-[0.3em] uppercase block mb-4">
+      <section className="bg-white">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-14 pb-10">
+          <span className="text-[11px] text-neutral-400 tracking-[0.3em] uppercase block mb-3">
             Shop
           </span>
-          <h1 className="font-oswald text-6xl lg:text-8xl font-bold uppercase tracking-tight text-gray-900">
+          <h1 className="font-oswald text-5xl lg:text-7xl font-bold uppercase tracking-tight">
             Products
           </h1>
-          <p className="text-gray-500 mt-6 max-w-lg">
+          <p className="text-neutral-500 mt-5 max-w-lg">
             Premium streetwear crafted in Tacloban City. Each piece is designed with
             purpose and built to last.
           </p>
         </div>
       </section>
 
-      {/* Filter Bar */}
-      <section className="sticky top-20 z-30 bg-white/90 backdrop-blur-xl border-y border-gray-200">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="flex items-center gap-1 py-4 overflow-x-auto scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 text-[13px] font-medium tracking-widest uppercase whitespace-nowrap transition-all rounded ${
-                  activeCategory === cat
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Suspense fallback={<div className="py-24 text-center text-neutral-400">Loading products…</div>}>
+        <ShopBrowser products={products} categories={categories} />
+      </Suspense>
 
-      {/* Products Grid */}
-      <section className="py-20 bg-white">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="mb-8">
-            <p className="text-gray-400 text-sm">
-              {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="group relative bg-gray-50 rounded-lg overflow-hidden"
-              >
-                <div className="relative aspect-[4/5] overflow-hidden">
-                  <ProductImage
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full"
-                  />
-
-                  {/* Badge */}
-                  {product.badge && (
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-white text-gray-900 text-[10px] font-bold tracking-widest uppercase rounded">
-                      {product.badge}
-                    </div>
-                  )}
-
-                  {/* Price */}
-                  <div className="absolute top-4 right-4 px-3 py-1.5 bg-white text-gray-900 text-xs font-bold rounded">
-                    {product.currency}{product.price}
-                  </div>
-
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  {/* Info */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <p className="text-[11px] text-gray-300 tracking-widest uppercase mb-1">
-                      {product.category}
-                    </p>
-                    <h3 className="font-oswald text-xl font-bold uppercase text-white">
-                      {product.name}
-                    </h3>
-                    <a
-                      href={`https://m.me/61575002625239?text=${encodeURIComponent(`Hi! I'm interested in the ${product.name}. Is it still available?`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-white text-gray-900 text-xs font-bold tracking-widest uppercase hover:bg-gray-100 transition-colors rounded"
-                    >
-                      Inquire
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-32">
-              <p className="font-oswald text-4xl font-bold text-gray-200 uppercase">
-                No products found
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Bulk Orders */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
-          <span className="text-[11px] text-gray-400 tracking-[0.3em] uppercase block mb-4">
+      <section className="py-16 bg-neutral-50 border-t border-neutral-200">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 text-center">
+          <span className="text-[11px] text-neutral-400 tracking-[0.3em] uppercase block mb-3">
             Custom Orders
           </span>
-          <h2 className="font-oswald text-4xl lg:text-5xl font-bold text-gray-900 uppercase tracking-tight mb-6">
+          <h2 className="font-oswald text-3xl lg:text-4xl font-bold uppercase tracking-tight mb-4">
             Bulk Orders Available
           </h2>
-          <p className="text-gray-500 mb-8 max-w-lg mx-auto">
+          <p className="text-neutral-500 mb-7 max-w-lg mx-auto text-sm">
             Need custom designs or bulk quantities? We offer special pricing for teams,
             organizations, and resellers.
           </p>
           <a
-            href="https://m.me/61575002625239?text=Hi! I'm interested in bulk ordering."
+            href="https://m.me/61575002625239?text=Hi!%20I%27m%20interested%20in%20bulk%20ordering."
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white font-oswald text-sm font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors rounded"
+            className="inline-flex px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
           >
             Contact for Bulk Orders
           </a>

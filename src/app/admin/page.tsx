@@ -1,105 +1,160 @@
-"use client";
+import Link from "next/link";
+import { getOrders, getProducts, getCategories, getReviews, getMedia } from "@/lib/store";
+import { formatPeso } from "@/lib/format";
+
+export const dynamic = "force-dynamic";
+
+const cards = [
+  { href: "/admin/orders", label: "Orders", desc: "Process and update order status" },
+  { href: "/admin/products", label: "Products", desc: "Add, edit, price, and stock" },
+  { href: "/admin/categories", label: "Categories", desc: "Organize your catalog" },
+  { href: "/admin/reviews", label: "Reviews", desc: "Publish and manage reviews" },
+  { href: "/admin/content", label: "Content", desc: "Business info, FAQs" },
+  { href: "/admin/media", label: "Media", desc: "Upload and manage images" },
+  { href: "/admin/logo", label: "Logo", desc: "Update the brand logo" },
+];
 
 export default function AdminDashboard() {
+  const orders = getOrders();
+  const products = getProducts({ includeUnlisted: true });
+  const categories = getCategories({ includeHidden: true });
+  const reviews = getReviews({ includeHidden: true });
+  const media = getMedia();
+
+  const pending = orders.filter((o) => o.status === "pending");
+  const lowStock = products.filter(
+    (p) => p.status === "active" && p.stock !== null && p.stock <= p.lowStockAt
+  );
+  const revenue = orders
+    .filter((o) => o.status !== "cancelled")
+    .reduce((sum, o) => sum + o.total, 0);
+
+  const stats = [
+    { label: "Total Orders", value: String(orders.length) },
+    { label: "Pending Orders", value: String(pending.length) },
+    { label: "Products", value: String(products.length) },
+    { label: "Active Revenue", value: formatPeso(revenue) },
+  ];
+
   return (
     <div>
-      <div className="mb-10">
-        <h1 className="font-oswald text-4xl font-bold text-gray-900 uppercase tracking-tight">
+      <div className="mb-9">
+        <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">
           Dashboard
         </h1>
-        <p className="text-gray-500 mt-2">Manage your MicsApparel website</p>
+        <p className="text-neutral-500 mt-2 text-sm">Manage your MicsApparel store</p>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {stats.map((stat) => (
+          <div key={stat.label} className="bg-white border border-neutral-200 p-5">
+            <p className="text-neutral-400 text-[10px] tracking-[0.2em] uppercase mb-1.5">
+              {stat.label}
+            </p>
+            <p className="font-oswald text-2xl font-bold">{stat.value}</p>
+          </div>
+        ))}
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <a
-          href="/admin/logo"
-          className="p-8 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all group"
-        >
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-6 group-hover:bg-gray-200 transition-colors">
-            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h2 className="font-oswald text-lg font-bold text-gray-900 uppercase tracking-wider mb-2">
-            Logo
-          </h2>
-          <p className="text-gray-500 text-sm">
-            Update your brand logo displayed across the site
-          </p>
-        </a>
-
-        <a
-          href="/admin/products"
-          className="p-8 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all group"
-        >
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-6 group-hover:bg-gray-200 transition-colors">
-            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-          </div>
-          <h2 className="font-oswald text-lg font-bold text-gray-900 uppercase tracking-wider mb-2">
-            Products
-          </h2>
-          <p className="text-gray-500 text-sm">
-            Add, edit, or remove products from your catalog
-          </p>
-        </a>
-
-        <a
-          href="/admin/content"
-          className="p-8 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all group"
-        >
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-6 group-hover:bg-gray-200 transition-colors">
-            <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </div>
-          <h2 className="font-oswald text-lg font-bold text-gray-900 uppercase tracking-wider mb-2">
-            Content
-          </h2>
-          <p className="text-gray-500 text-sm">
-            Edit business info, testimonials, and FAQs
-          </p>
-        </a>
+        {cards.map((card) => (
+          <Link
+            key={card.href}
+            href={card.href}
+            className="p-6 bg-white border border-neutral-200 hover:border-black hover:shadow-sm transition-all group"
+          >
+            <h2 className="font-oswald text-lg font-bold uppercase tracking-wide group-hover:text-neutral-600 transition-colors">
+              {card.label}
+            </h2>
+            <p className="text-neutral-500 text-sm mt-1.5">{card.desc}</p>
+          </Link>
+        ))}
       </div>
 
-      {/* Quick Stats */}
-      <div className="mt-16">
-        <h3 className="font-oswald text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-6">
-          Quick Info
-        </h3>
-        <div className="grid sm:grid-cols-3 gap-4">
-          <div className="p-6 bg-white rounded-lg border border-gray-200">
-            <p className="text-gray-400 text-xs tracking-widest uppercase mb-1">
-              Website
-            </p>
-            <a
-              href="https://micsapparel.vercel.app"
-              target="_blank"
-              className="text-gray-900 text-sm font-medium hover:text-gray-600 transition-colors"
+      <div className="mt-12 grid lg:grid-cols-2 gap-4">
+        <div className="bg-white border border-neutral-200 p-6">
+          <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-4">
+            Recent Orders
+          </h3>
+          {orders.length === 0 ? (
+            <p className="text-neutral-400 text-sm">No orders yet.</p>
+          ) : (
+            <ul className="space-y-3">
+              {orders.slice(0, 5).map((order) => (
+                <li key={order.id} className="flex items-center justify-between gap-3 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{order.orderNumber}</p>
+                    <p className="text-xs text-neutral-400 truncate">
+                      {order.customer.name}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-medium">{formatPeso(order.total)}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-neutral-400">
+                      {order.status}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          {orders.length > 0 && (
+            <Link
+              href="/admin/orders"
+              className="inline-block mt-4 text-xs tracking-widest uppercase text-neutral-500 hover:text-black transition-colors"
             >
-              micsapparel.vercel.app
-            </a>
-          </div>
-          <div className="p-6 bg-white rounded-lg border border-gray-200">
-            <p className="text-gray-400 text-xs tracking-widest uppercase mb-1">
-              Admin Password
-            </p>
-            <p className="text-gray-900 text-sm font-medium">micsapparel2024</p>
-          </div>
-          <div className="p-6 bg-white rounded-lg border border-gray-200">
-            <p className="text-gray-400 text-xs tracking-widest uppercase mb-1">
-              GitHub
-            </p>
-            <a
-              href="https://github.com/Jorayyy/micsapparel"
-              target="_blank"
-              className="text-gray-900 text-sm font-medium hover:text-gray-600 transition-colors"
-            >
-              github.com/Jorayyy/micsapparel
-            </a>
-          </div>
+              View all orders →
+            </Link>
+          )}
         </div>
+
+        <div className="bg-white border border-neutral-200 p-6">
+          <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-4">
+            Store Health
+          </h3>
+          <ul className="space-y-3 text-sm">
+            <li className="flex justify-between">
+              <span className="text-neutral-500">Categories</span>
+              <span className="font-medium">{categories.length}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-neutral-500">Reviews</span>
+              <span className="font-medium">{reviews.length}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-neutral-500">Media files</span>
+              <span className="font-medium">{media.length}</span>
+            </li>
+            <li className="flex justify-between">
+              <span className="text-neutral-500">Low stock items</span>
+              <span className={`font-medium ${lowStock.length ? "text-red-600" : ""}`}>
+                {lowStock.length}
+              </span>
+            </li>
+          </ul>
+          {lowStock.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-neutral-200">
+              <p className="text-[10px] uppercase tracking-widest text-neutral-400 mb-2">
+                Needs attention
+              </p>
+              <ul className="space-y-1">
+                {lowStock.slice(0, 5).map((product) => (
+                  <li key={product.id} className="text-xs text-neutral-600">
+                    {product.name} — {product.stock} left
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-8 text-xs text-neutral-400">
+        <p>
+          Data is stored in <code className="text-neutral-500">.data/store.json</code> on
+          the server. Set <code className="text-neutral-500">ADMIN_PASSWORD</code> in
+          production environment variables.
+        </p>
       </div>
     </div>
   );

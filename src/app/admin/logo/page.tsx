@@ -1,148 +1,173 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import type { Business } from "@/lib/types";
 
 export default function AdminLogo() {
+  const [business, setBusiness] = useState<Business | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const stored = localStorage.getItem("micsapparel-logo");
-    if (stored) {
-      setLogoUrl(stored);
-    } else {
-      setLogoUrl("https://graph.facebook.com/61575002625239/picture?type=large&width=400");
-    }
+    fetch("/api/admin/content")
+      .then((res) => res.json())
+      .then((data) => {
+        setBusiness(data.business);
+        setLogoUrl(data.business?.logo ?? "");
+      })
+      .catch(() => setError("Failed to load current logo"));
   }, []);
 
-  function handleSave() {
+  async function save(logo: string) {
+    if (!business) return;
     setSaving(true);
     setMessage("");
-
+    setError("");
     try {
-      localStorage.setItem("micsapparel-logo", logoUrl);
-      setMessage("Logo updated! Changes appear on the site immediately.");
+      const res = await fetch("/api/admin/content", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          section: "business",
+          data: { ...business, logo },
+        }),
+      });
+      if (!res.ok) {
+        setError("Failed to save logo");
+        return;
+      }
+      setLogoUrl(logo);
+      setMessage("Logo updated across the site.");
       setTimeout(() => setMessage(""), 3000);
     } catch {
-      setMessage("Error saving logo");
+      setError("Connection error");
     }
     setSaving(false);
   }
 
-  function handleReset() {
-    const defaultUrl = "https://graph.facebook.com/61575002625239/picture?type=large&width=400";
-    setLogoUrl(defaultUrl);
-    localStorage.setItem("micsapparel-logo", defaultUrl);
-    setMessage("Logo reset to default");
-    setTimeout(() => setMessage(""), 3000);
-  }
+  const DEFAULT_LOGO =
+    "https://graph.facebook.com/61575002625239/picture?type=large&width=400";
 
   return (
     <div>
-      <div className="mb-10">
-        <h1 className="font-oswald text-4xl font-bold text-gray-900 uppercase tracking-tight">
-          Logo
-        </h1>
-        <p className="text-gray-500 mt-2">Update the brand logo displayed across the site</p>
+      <div className="mb-9">
+        <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">Logo</h1>
+        <p className="text-neutral-500 mt-2 text-sm">
+          Brand logo shown in the navbar, footer, and about sections
+        </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-10">
-        {/* Preview */}
-        <div className="bg-white rounded-lg border border-gray-200 p-8">
-          <h3 className="font-oswald text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-6">
+      <div className="grid lg:grid-cols-2 gap-8">
+        <div className="bg-white border border-neutral-200 p-7">
+          <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-5">
             Preview
           </h3>
-          <div className="flex items-center justify-center py-10 bg-gray-50 rounded-lg">
+          <div className="flex items-center justify-center py-10 bg-neutral-50">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoUrl}
-              alt="Logo Preview"
-              className="w-32 h-32 rounded-full object-cover ring-2 ring-gray-200"
+              alt="Logo preview"
+              className="w-32 h-32 rounded-full object-cover ring-2 ring-neutral-200"
               onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=200";
+                const target = e.currentTarget as HTMLImageElement;
+                target.src =
+                  "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=200";
               }}
             />
           </div>
-          <div className="mt-6 flex items-center gap-2">
+          <div className="mt-6 flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoUrl}
-              alt="Logo Small"
-              className="w-8 h-8 rounded-full object-cover"
+              alt=""
+              className="w-9 h-9 rounded-full object-cover"
               onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=100";
+                const target = e.currentTarget as HTMLImageElement;
+                target.src =
+                  "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=100";
               }}
             />
-            <span className="font-oswald text-sm font-bold tracking-[0.2em] uppercase text-gray-900">
+            <span className="font-oswald text-sm font-bold tracking-[0.18em] uppercase">
               MicsApparel
             </span>
           </div>
         </div>
 
-        {/* Edit */}
-        <div className="bg-white rounded-lg border border-gray-200 p-8">
-          <h3 className="font-oswald text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-6">
+        <div className="bg-white border border-neutral-200 p-7 space-y-5">
+          <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase">
             Update Logo
           </h3>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-[11px] font-bold text-gray-500 tracking-[0.2em] uppercase mb-3">
-                Logo URL
-              </label>
-              <input
-                type="url"
-                value={logoUrl}
-                onChange={(e) => setLogoUrl(e.target.value)}
-                className="w-full px-4 py-4 bg-gray-50 border border-gray-200 text-gray-900 text-sm focus:outline-none focus:border-gray-400 transition-colors placeholder:text-gray-400 rounded"
-                placeholder="https://example.com/logo.jpg"
-              />
-              <p className="text-gray-400 text-xs mt-2">
-                Paste a URL to your logo image (JPG, PNG, SVG)
-              </p>
-            </div>
+          <div>
+            <label className="block text-[11px] font-bold tracking-[0.2em] uppercase mb-2">
+              Logo URL
+            </label>
+            <input
+              type="url"
+              value={logoUrl}
+              onChange={(e) => setLogoUrl(e.target.value)}
+              className="w-full px-4 py-3.5 bg-white border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors"
+              placeholder="https://example.com/logo.jpg"
+            />
+            <p className="text-neutral-400 text-xs mt-2">
+              JPG, PNG, or SVG URL (JPG/PNG recommended for best rendering)
+            </p>
+          </div>
 
-            {message && (
-              <p className="text-gray-700 text-sm bg-gray-50 px-4 py-3 border border-gray-200 rounded">
-                {message}
-              </p>
-            )}
+          {message && (
+            <p className="text-sm bg-neutral-50 border border-neutral-200 px-4 py-3">
+              {message}
+            </p>
+          )}
+          {error && (
+            <p className="text-sm bg-red-50 border border-red-200 text-red-700 px-4 py-3">
+              {error}
+            </p>
+          )}
 
-            <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => save(logoUrl)}
+              disabled={saving || !logoUrl}
+              className="px-6 py-3.5 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save Logo"}
+            </button>
+            <button
+              type="button"
+              onClick={() => save(DEFAULT_LOGO)}
+              className="px-6 py-3.5 border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+            >
+              Reset to Default
+            </button>
+          </div>
+
+          <div className="pt-5 border-t border-neutral-200">
+            <h4 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-3">
+              Quick Sources
+            </h4>
+            <div className="space-y-2">
               <button
-                onClick={handleSave}
-                disabled={saving}
-                className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors disabled:opacity-50 rounded"
+                type="button"
+                onClick={() => setLogoUrl(DEFAULT_LOGO)}
+                className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
               >
-                {saving ? "Saving..." : "Save Logo"}
+                Facebook Page Photo
               </button>
               <button
-                onClick={handleReset}
-                className="px-6 py-3 border border-gray-300 text-gray-600 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-gray-50 transition-colors rounded"
+                type="button"
+                onClick={() =>
+                  setLogoUrl(
+                    "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=400&bold=true&font=oswald"
+                  )
+                }
+                className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
               >
-                Reset to Default
+                Generated MA Avatar
               </button>
-            </div>
-
-            <div className="pt-6 border-t border-gray-200">
-              <h4 className="font-oswald text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-3">
-                Quick Sources
-              </h4>
-              <div className="space-y-2">
-                <button
-                  onClick={() => setLogoUrl("https://graph.facebook.com/61575002625239/picture?type=large&width=400")}
-                  className="block w-full text-left px-4 py-3 bg-gray-50 border border-gray-200 text-sm text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-all rounded"
-                >
-                  Facebook Page Photo
-                </button>
-                <button
-                  onClick={() => setLogoUrl("https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=400&bold=true&font=oswald")}
-                  className="block w-full text-left px-4 py-3 bg-gray-50 border border-gray-200 text-sm text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-all rounded"
-                >
-                  Generated MA Avatar
-                </button>
-              </div>
             </div>
           </div>
         </div>
