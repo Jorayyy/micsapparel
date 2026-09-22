@@ -154,7 +154,7 @@ export default function AdminLogo() {
                 onClick={() => setLogoUrl(DEFAULT_LOGO)}
                 className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
               >
-                Facebook Page Photo (often a gray silhouette)
+                Local MA Logo (default)
               </button>
               <button
                 type="button"
