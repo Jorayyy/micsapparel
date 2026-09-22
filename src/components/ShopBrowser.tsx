@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Category, Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
@@ -33,6 +33,16 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
 
   const [search, setSearch] = useState(query);
   const [limit, setLimit] = useState(PAGE_SIZE);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get("focus") !== "search") return;
+    inputRef.current?.focus();
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("focus");
+    const qs = params.toString();
+    router.replace(qs ? `/products?${qs}` : "/products", { scroll: false });
+  }, [searchParams, router]);
 
   function updateParams(patch: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -122,6 +132,7 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
                 }}
               >
                 <input
+                  ref={inputRef}
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}

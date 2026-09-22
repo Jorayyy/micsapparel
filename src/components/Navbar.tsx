@@ -18,7 +18,7 @@ const navLinks = [
 const bottomLinks = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/products", label: "Shop", icon: "shop" },
-  { href: "/products?q=", label: "Search", icon: "search" },
+  { href: "/products?focus=search", label: "Search", icon: "search" },
   { href: "#cart", label: "Cart", icon: "cart" },
 ];
 
@@ -135,7 +135,7 @@ export default function Navbar() {
 
             <div className="flex items-center gap-1 sm:gap-2">
               <Link
-                href="/products?q="
+                href="/products?focus=search"
                 className="p-2.5 text-neutral-600 hover:text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                 aria-label="Search products"
               >
