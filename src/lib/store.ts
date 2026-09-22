@@ -30,7 +30,12 @@ const LEGACY_IMAGE_NAMES: Record<string, string[]> = {
 };
 
 export function dataDir(): string {
-  return process.env.DATA_DIR || join(process.cwd(), ".data");
+  if (process.env.DATA_DIR) return process.env.DATA_DIR;
+  // Vercel/serverless: project dir is read-only; /tmp is writable per instance.
+  if (process.env.VERCEL || process.env.NEXT_PHASE === "phase-production-build") {
+    return join("/tmp", "micsapparel-data");
+  }
+  return join(process.cwd(), ".data");
 }
 
 function storeFile(): string {
@@ -58,6 +63,7 @@ let cache: StoreData | null = null;
 let cacheMtime = -1;
 
 function load(): StoreData {
+  if (cache && cacheMtime === -2) return cache;
   const file = storeFile();
   try {
     const st = statSync(file);
@@ -68,21 +74,29 @@ function load(): StoreData {
     cacheMtime = st.mtimeMs;
     return merged;
   } catch {
+    if (cache) return cache;
     const fresh = seed();
+    cache = fresh;
+    cacheMtime = -2;
     persist(fresh);
     return fresh;
   }
 }
 
 function persist(data: StoreData): void {
-  mkdirSync(dataDir(), { recursive: true });
-  const file = storeFile();
-  writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
   cache = data;
   try {
-    cacheMtime = statSync(file).mtimeMs;
+    mkdirSync(dataDir(), { recursive: true });
+    const file = storeFile();
+    writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
+    try {
+      cacheMtime = statSync(file).mtimeMs;
+    } catch {
+      cacheMtime = -2;
+    }
   } catch {
-    cacheMtime = -1;
+    // Read-only FS (e.g. failed /tmp): keep in-memory cache only.
+    cacheMtime = -2;
   }
 }
 
