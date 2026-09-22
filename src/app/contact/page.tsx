@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 const MAPS_SRC =
   "https://www.google.com/maps?q=Tacloban+City,+Leyte,+Philippines&output=embed";
 
-export default function ContactPage() {
-  const business = getBusiness();
+export default async function ContactPage() {
+  const business = await getBusiness();
 
   const cards = [
     {

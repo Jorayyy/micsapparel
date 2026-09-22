@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { isAdminAuthenticated, isSameOrigin } from "@/lib/admin-auth";
-import { addMedia, deleteMedia, getMedia, uploadsDir } from "@/lib/store";
+import { addMedia, deleteMedia, getMedia } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +12,7 @@ export async function GET() {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ media: getMedia() });
+  return NextResponse.json({ media: await getMedia() });
 }
 
 export async function POST(request: NextRequest) {
@@ -52,18 +50,18 @@ export async function POST(request: NextRequest) {
     };
     const ext = extFromType[file.type] || extFromName || "jpg";
 
-    const dir = uploadsDir();
-    mkdirSync(dir, { recursive: true });
     const buffer = Buffer.from(await file.arrayBuffer());
-    writeFileSync(join(/*turbopackIgnore: true*/ dir, `${id}.${ext}`), buffer);
 
-    const media = addMedia({
-      id,
-      url: `/api/media/${id}.${ext}`,
-      filename: file.name || `${id}.${ext}`,
-      mimeType: file.type,
-      size: file.size,
-    });
+    const media = await addMedia(
+      {
+        id,
+        url: `/api/media/${id}.${ext}`,
+        filename: file.name || `${id}.${ext}`,
+        mimeType: file.type,
+        size: file.size,
+      },
+      buffer
+    );
 
     return NextResponse.json({ success: true, media });
   } catch {
@@ -83,7 +81,7 @@ export async function DELETE(request: NextRequest) {
     if (!body.id) {
       return NextResponse.json({ error: "Media id required" }, { status: 400 });
     }
-    const removed = deleteMedia(body.id);
+    const removed = await deleteMedia(body.id);
     if (!removed) {
       return NextResponse.json({ error: "Media not found" }, { status: 404 });
     }

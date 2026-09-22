@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: now, changeFrequency: "weekly", priority: 1 },
@@ -40,14 +40,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  const productPages: MetadataRoute.Sitemap = getProducts().map((product) => ({
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+
+  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${SITE_URL}/products/${product.slug}`,
     lastModified: new Date(product.updatedAt),
     changeFrequency: "weekly",
     priority: 0.8,
   }));
 
-  const categoryPages: MetadataRoute.Sitemap = getCategories().map((category) => ({
+  const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
     url: `${SITE_URL}/products?category=${category.slug}`,
     lastModified: now,
     changeFrequency: "weekly",

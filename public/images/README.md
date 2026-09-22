@@ -32,5 +32,5 @@ Drop your product photos here with these exact names:
 The website automatically prefers these local files over the placeholder images.
 
 Alternatively, use the admin **Media** page (`/admin/media`) to upload images and paste
-their URLs into product image fields. Note: admin uploads live in `.data/uploads` and reset
-on redeploy on serverless hosts, so `public/images` is the more durable option.
+their URLs into product image fields. Uploads are stored in Postgres (`DATABASE_URL`)
+and survive redeploys.

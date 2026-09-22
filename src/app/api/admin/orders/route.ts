@@ -19,11 +19,11 @@ export async function GET(request: NextRequest) {
   }
   const id = request.nextUrl.searchParams.get("id");
   if (id) {
-    const order = getOrderById(id);
+    const order = await getOrderById(id);
     if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
     return NextResponse.json({ order });
   }
-  return NextResponse.json({ orders: getOrders() });
+  return NextResponse.json({ orders: await getOrders() });
 }
 
 export async function PUT(request: NextRequest) {
@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest) {
     if (!body.id || !body.status || !STATUSES.includes(body.status)) {
       return NextResponse.json({ error: "Valid id and status required" }, { status: 400 });
     }
-    const order = updateOrderStatus(body.id, body.status, body.note);
+    const order = await updateOrderStatus(body.id, body.status, body.note);
     if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
     return NextResponse.json({ order });
   } catch {

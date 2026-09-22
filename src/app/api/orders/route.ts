@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       ? (body.paymentMethod as PaymentMethod)
       : "gcash";
 
-    const result = createOrder({
+    const result = await createOrder({
       items: body.items
         .filter((item) => item && typeof item.productId === "string")
         .map((item) => ({

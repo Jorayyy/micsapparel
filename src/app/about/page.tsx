@@ -11,8 +11,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
-export default function AboutPage() {
-  const business = getBusiness();
+export default async function AboutPage() {
+  const business = await getBusiness();
 
   return (
     <>

@@ -20,7 +20,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
   const { order: identifier } = await searchParams;
   if (!identifier) notFound();
 
-  const order = getOrderById(identifier);
+  const order = await getOrderById(identifier);
   if (!order) notFound();
 
   const messenger = messengerUrl(

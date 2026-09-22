@@ -14,7 +14,9 @@ export async function GET() {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ categories: getCategories({ includeHidden: true }) });
+  return NextResponse.json({
+    categories: await getCategories({ includeHidden: true }),
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -29,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!input?.name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
-    const category = createCategory({
+    const category = await createCategory({
       name: input.name,
       slug: input.slug || input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       description: input.description ?? "",
@@ -56,7 +58,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Category id required" }, { status: 400 });
     }
     const { id, ...patch } = body;
-    const category = updateCategory(id, patch);
+    const category = await updateCategory(id, patch);
     if (!category) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
@@ -78,7 +80,7 @@ export async function DELETE(request: NextRequest) {
     if (!body?.id) {
       return NextResponse.json({ error: "Category id required" }, { status: 400 });
     }
-    const removed = deleteCategory(body.id);
+    const removed = await deleteCategory(body.id);
     if (!removed) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }

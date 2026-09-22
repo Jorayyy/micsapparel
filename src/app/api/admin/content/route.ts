@@ -13,11 +13,12 @@ import type { Business, Faq, Review } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({
-    business: getBusiness(),
-    faqs: getFaqs(),
-    reviews: getReviews({ includeHidden: true }),
-  });
+  const [business, faqs, reviews] = await Promise.all([
+    getBusiness(),
+    getFaqs(),
+    getReviews({ includeHidden: true }),
+  ]);
+  return NextResponse.json({ business, faqs, reviews });
 }
 
 export async function PUT(request: NextRequest) {
@@ -38,28 +39,29 @@ export async function PUT(request: NextRequest) {
     switch (section) {
       case "business": {
         const patch = data as Partial<Business>;
-        updateBusiness(patch);
+        await updateBusiness(patch);
         break;
       }
       case "faqs": {
         if (!Array.isArray(data)) throw new Error("Invalid FAQs");
-        setFaqs(data as Faq[]);
+        await setFaqs(data as Faq[]);
         break;
       }
       case "reviews": {
         if (!data || typeof data !== "object") throw new Error("Invalid review");
-        upsertReview(data as Review);
+        await upsertReview(data as Review);
         break;
       }
       default:
         return NextResponse.json({ error: "Invalid section" }, { status: 400 });
     }
 
-    return NextResponse.json({
-      business: getBusiness(),
-      faqs: getFaqs(),
-      reviews: getReviews({ includeHidden: true }),
-    });
+    const [business, faqs, reviews] = await Promise.all([
+      getBusiness(),
+      getFaqs(),
+      getReviews({ includeHidden: true }),
+    ]);
+    return NextResponse.json({ business, faqs, reviews });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

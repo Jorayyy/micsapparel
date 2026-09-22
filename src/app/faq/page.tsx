@@ -11,9 +11,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/faq" },
 };
 
-export default function FaqPage() {
-  const faqs = getFaqs();
-  const business = getBusiness();
+export default async function FaqPage() {
+  const [faqs, business] = await Promise.all([getFaqs(), getBusiness()]);
 
   return (
     <>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { imageUrlHint, isValidImageUrl } from "@/lib/images";
 import type { Category, Product, ProductVariant, ProductStatus } from "@/lib/types";
 
 const EMPTY: Product = {
@@ -98,6 +99,12 @@ export default function AdminProducts() {
         images: product.images.filter(Boolean),
         variants: product.variants.filter((v) => v.name && v.value),
       };
+
+      const badImage = payload.images.find((url) => !isValidImageUrl(url));
+      if (badImage) {
+        flash(`Invalid image URL "${badImage}". ${imageUrlHint}`, true);
+        return;
+      }
 
       const res = await fetch("/api/admin/products", {
         method: product.id ? "PUT" : "POST",
@@ -287,6 +294,7 @@ function ProductEditor({
   const [form, setForm] = useState<Product>({ ...product });
   const [featureInput, setFeatureInput] = useState("");
   const [imageInput, setImageInput] = useState("");
+  const [imageError, setImageError] = useState("");
   const [uploading, setUploading] = useState(false);
 
   function set<K extends keyof Product>(key: K, value: Product[K]) {
@@ -565,10 +573,15 @@ function ProductEditor({
           <button
             type="button"
             onClick={() => {
-              if (imageInput.trim()) {
-                set("images", [...form.images, imageInput.trim()]);
-                setImageInput("");
+              const url = imageInput.trim();
+              if (!url) return;
+              if (!isValidImageUrl(url)) {
+                setImageError(imageUrlHint);
+                return;
               }
+              setImageError("");
+              set("images", [...form.images, url]);
+              setImageInput("");
             }}
             className="px-4 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50"
           >
@@ -588,6 +601,9 @@ function ProductEditor({
             />
           </label>
         </div>
+        {imageError && (
+          <p className="mt-2 text-xs text-red-600">{imageError}</p>
+        )}
       </div>
 
       <div>

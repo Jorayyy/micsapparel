@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated, isSameOrigin } from "@/lib/admin-auth";
+import { imageUrlHint, isValidImageUrl } from "@/lib/images";
 import {
   createProduct,
   deleteProduct,
@@ -14,7 +15,7 @@ export async function GET() {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ products: getProducts({ includeUnlisted: true }) });
+  return NextResponse.json({ products: await getProducts({ includeUnlisted: true }) });
 }
 
 export async function POST(request: NextRequest) {
@@ -30,7 +31,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Name and price are required" }, { status: 400 });
     }
     const normalized = normalize(input);
-    const product = createProduct({
+    const badImage = (normalized.images ?? []).find((url) => !isValidImageUrl(url));
+    if (badImage) {
+      return NextResponse.json(
+        { error: `Invalid image URL "${badImage}". ${imageUrlHint}` },
+        { status: 400 }
+      );
+    }
+    const product = await createProduct({
       name: normalized.name ?? "",
       price: normalized.price ?? 0,
       compareAtPrice: normalized.compareAtPrice ?? null,
@@ -67,7 +75,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Product id required" }, { status: 400 });
     }
     const { id, ...patch } = body;
-    const product = updateProduct(id, normalize(patch));
+    const normalized = normalize(patch);
+    const badImage = (normalized.images ?? []).find((url) => !isValidImageUrl(url));
+    if (badImage) {
+      return NextResponse.json(
+        { error: `Invalid image URL "${badImage}". ${imageUrlHint}` },
+        { status: 400 }
+      );
+    }
+    const product = await updateProduct(id, normalized);
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
@@ -89,7 +105,7 @@ export async function DELETE(request: NextRequest) {
     if (!body?.id) {
       return NextResponse.json({ error: "Product id required" }, { status: 400 });
     }
-    const removed = deleteProduct(body.id);
+    const removed = await deleteProduct(body.id);
     if (!removed) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }

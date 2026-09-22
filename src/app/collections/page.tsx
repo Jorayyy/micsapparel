@@ -13,9 +13,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/collections" },
 };
 
-export default function CollectionsPage() {
-  const categories = getCategories();
-  const products = getProducts();
+export default async function CollectionsPage() {
+  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
 
   return (
     <>

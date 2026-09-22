@@ -13,8 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-  const products = getProducts();
-  const categories = getCategories();
+  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
 
   return (
     <>

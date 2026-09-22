@@ -16,11 +16,14 @@ const marqueeWords = [
   "Faith-Driven",
 ];
 
-export default function Home() {
-  const business = getBusiness();
-  const products = getProducts();
-  const categories = getCategories();
-  const reviews = getReviews().slice(0, 6);
+export default async function Home() {
+  const [business, products, categories, reviewsList] = await Promise.all([
+    getBusiness(),
+    getProducts(),
+    getCategories(),
+    getReviews(),
+  ]);
+  const reviews = reviewsList.slice(0, 6);
 
   const featured = products.filter((p) => p.featured).slice(0, 6);
   const newArrivals = products.filter((p) => p.isNew).slice(0, 4);

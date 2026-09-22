@@ -21,7 +21,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return { title: "Product Not Found" };
 
   return {
@@ -42,12 +42,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const business = getBusiness();
-  const category = getCategoryBySlug(product.category);
-  const related = getProducts()
+  const [business, category, relatedProducts] = await Promise.all([
+    getBusiness(),
+    getCategoryBySlug(product.category),
+    getProducts(),
+  ]);
+  const related = relatedProducts
     .filter((p) => p.id !== product.id && p.category === product.category)
     .slice(0, 4);
 

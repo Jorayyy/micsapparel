@@ -39,7 +39,11 @@ export default function ProductImage({
         className="object-cover transition-transform duration-700 group-hover:scale-105"
         onError={(e) => {
           const target = e.currentTarget as HTMLImageElement;
-          target.style.visibility = "hidden";
+          if (!target.src.endsWith("/logo.svg")) {
+            target.src = "/logo.svg";
+          } else {
+            target.style.visibility = "hidden";
+          }
         }}
       />
     </div>

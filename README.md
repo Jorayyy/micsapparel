@@ -1,5 +1,25 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Database (Neon Postgres)
+
+All store data (products, categories, reviews, FAQs, orders, media uploads, business
+content) lives in Postgres and is the source of truth. The old `.data/store.json`
+file store is legacy only.
+
+1. Copy `.env.example` to `.env.local` and set `DATABASE_URL` to your Neon connection
+   string (also set it in Vercel project settings for production).
+2. First request auto-creates tables and seeds catalog content from `src/data/business.ts`.
+3. To import existing local data (`.data/store.json` + `.data/uploads`):
+
+```bash
+npm run migrate:neon
+```
+
+Image URL rules: product image fields accept local paths (`/images/...`) or direct
+image URLs from hosts allowed in `next.config.ts` (`picsum.photos`,
+`graph.facebook.com`, `images.unsplash.com`, `ui-avatars.com`, `*.fbcdn.net`).
+Facebook post/page links are not images and are rejected.
+
 ## Getting Started
 
 First, run the development server:

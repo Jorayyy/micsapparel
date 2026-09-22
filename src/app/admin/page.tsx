@@ -14,12 +14,14 @@ const cards = [
   { href: "/admin/logo", label: "Logo", desc: "Update the brand logo" },
 ];
 
-export default function AdminDashboard() {
-  const orders = getOrders();
-  const products = getProducts({ includeUnlisted: true });
-  const categories = getCategories({ includeHidden: true });
-  const reviews = getReviews({ includeHidden: true });
-  const media = getMedia();
+export default async function AdminDashboard() {
+  const [orders, products, categories, reviews, media] = await Promise.all([
+    getOrders(),
+    getProducts({ includeUnlisted: true }),
+    getCategories({ includeHidden: true }),
+    getReviews({ includeHidden: true }),
+    getMedia(),
+  ]);
 
   const pending = orders.filter((o) => o.status === "pending");
   const lowStock = products.filter(
@@ -151,9 +153,9 @@ export default function AdminDashboard() {
 
       <div className="mt-8 text-xs text-neutral-400">
         <p>
-          Data is stored in <code className="text-neutral-500">.data/store.json</code> on
-          the server. Set <code className="text-neutral-500">ADMIN_PASSWORD</code> in
-          production environment variables.
+          Data is stored in Neon Postgres (<code className="text-neutral-500">DATABASE_URL</code>
+          ). Set <code className="text-neutral-500">ADMIN_PASSWORD</code> in production
+          environment variables.
         </p>
       </div>
     </div>

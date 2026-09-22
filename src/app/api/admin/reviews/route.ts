@@ -9,7 +9,7 @@ export async function GET() {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json({ reviews: getReviews({ includeHidden: true }) });
+  return NextResponse.json({ reviews: await getReviews({ includeHidden: true }) });
 }
 
 export async function POST(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (!input?.name || !input?.text) {
       return NextResponse.json({ error: "Name and text are required" }, { status: 400 });
     }
-    const review = upsertReview({
+    const review = await upsertReview({
       name: input.name,
       text: input.text,
       rating: Math.min(5, Math.max(1, Number(input.rating) || 5)),
@@ -54,7 +54,7 @@ export async function DELETE(request: NextRequest) {
     if (!body.id) {
       return NextResponse.json({ error: "Review id required" }, { status: 400 });
     }
-    const removed = deleteReview(body.id);
+    const removed = await deleteReview(body.id);
     if (!removed) {
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
