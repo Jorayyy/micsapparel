@@ -1,44 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useContent } from "@/lib/content-context";
 
 export default function Footer() {
   const { business } = useContent();
-  const router = useRouter();
-
-  useEffect(() => {
-    let buffer = "";
-    let timer: number | null = null;
-    function onKey(e: KeyboardEvent) {
-      if (e.key.length !== 1 || !/[a-z]/i.test(e.key)) return;
-      const target = e.target as HTMLElement | null;
-      if (
-        target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable)
-      ) {
-        return;
-      }
-      buffer = (buffer + e.key.toLowerCase()).slice(-5);
-      if (timer) window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        buffer = "";
-      }, 1200);
-      if (buffer === "admin") {
-        buffer = "";
-        router.push("/admin");
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      if (timer) window.clearTimeout(timer);
-    };
-  }, [router]);
 
   return (
     <footer className="bg-white border-t border-neutral-200 pb-16 lg:pb-0">
@@ -79,6 +45,7 @@ export default function Footer() {
                 { href: "/about", label: "About" },
                 { href: "/faq", label: "FAQ" },
                 { href: "/contact", label: "Contact" },
+                { href: "/admin", label: "Admin Login" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -133,15 +100,7 @@ export default function Footer() {
 
         <div className="py-7 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-neutral-400 text-xs tracking-wider">
-            &copy; {new Date().getFullYear()} MicsApparel. All rights reserved
-            <Link
-              href="/admin"
-              aria-hidden="true"
-              tabIndex={-1}
-              className="text-neutral-400 hover:text-neutral-600 transition-colors"
-            >
-              .
-            </Link>
+            &copy; {new Date().getFullYear()} MicsApparel. All rights reserved.
           </p>
           <p className="text-neutral-400 text-xs tracking-wider">
             Made with purpose in Tacloban City
