@@ -161,17 +161,40 @@ export default function Navbar() {
             </nav>
 
             <div className="flex items-center gap-1 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => setSearchOpen((v) => !v)}
-                className={`p-2.5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
-                  searchOpen ? "text-black" : "text-neutral-600 hover:text-black"
-                }`}
-                aria-label="Search products"
-                aria-expanded={searchOpen}
-              >
-                <NavIcon name="search" />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen((v) => !v)}
+                  className={`p-2.5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                    searchOpen ? "text-black" : "text-neutral-600 hover:text-black"
+                  }`}
+                  aria-label="Search products"
+                  aria-expanded={searchOpen}
+                >
+                  <NavIcon name="search" />
+                </button>
+
+                {/* Search dropdown below the search icon */}
+                <div
+                  className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 w-60 sm:w-64 bg-white border shadow-sm overflow-hidden transition-all duration-300 ${
+                    searchOpen
+                      ? "max-h-24 opacity-100 border-neutral-200"
+                      : "max-h-0 opacity-0 border-transparent shadow-none pointer-events-none"
+                  }`}
+                >
+                  <form onSubmit={submitSearch} className="p-2.5">
+                    <input
+                      ref={searchInputRef}
+                      type="search"
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      placeholder="Search products"
+                      aria-label="Search products"
+                      className="w-full px-3 py-2 border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors"
+                    />
+                  </form>
+                </div>
+              </div>
 
               <button
                 type="button"
@@ -223,28 +246,6 @@ export default function Navbar() {
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Search dropdown below navbar */}
-        <div
-          className={`overflow-hidden transition-all duration-300 border-t border-transparent ${
-            searchOpen ? "max-h-24 opacity-100 border-neutral-200" : "max-h-0 opacity-0"
-          }`}
-        >
-          <form
-            onSubmit={submitSearch}
-            className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-3"
-          >
-            <input
-              ref={searchInputRef}
-              type="search"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              placeholder="Search products"
-              aria-label="Search products"
-              className="w-full px-4 py-2.5 border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors"
-            />
-          </form>
         </div>
       </header>
 

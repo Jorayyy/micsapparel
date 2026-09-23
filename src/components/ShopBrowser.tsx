@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Category, Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
@@ -31,18 +31,7 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
   const sort = (searchParams.get("sort") as SortKey) || "featured";
   const maxPrice = Number(searchParams.get("max") || 0);
 
-  const [search, setSearch] = useState(query);
   const [limit, setLimit] = useState(PAGE_SIZE);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (searchParams.get("focus") !== "search") return;
-    inputRef.current?.focus();
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("focus");
-    const qs = params.toString();
-    router.replace(qs ? `/products?${qs}` : "/products", { scroll: false });
-  }, [searchParams, router]);
 
   function updateParams(patch: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -124,24 +113,6 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
             </div>
 
             <div className="flex items-center gap-2">
-              <form
-                className="flex-1 lg:w-56"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  updateParams({ q: search.trim() || null });
-                }}
-              >
-                <input
-                  ref={inputRef}
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search products"
-                  aria-label="Search products"
-                  className="w-full px-3 py-2 border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors"
-                />
-              </form>
-
               <select
                 value={sort}
                 onChange={(e) => updateParams({ sort: e.target.value === "featured" ? null : e.target.value })}
@@ -183,7 +154,6 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
               <button
                 type="button"
                 onClick={() => {
-                  setSearch("");
                   router.replace("/products", { scroll: false });
                   setLimit(PAGE_SIZE);
                 }}
@@ -202,7 +172,6 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
               <button
                 type="button"
                 onClick={() => {
-                  setSearch("");
                   router.replace("/products", { scroll: false });
                 }}
                 className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
