@@ -42,16 +42,88 @@ const INTENTS: { test: RegExp; faq: RegExp }[] = [
   { test: /order|buy|purchase|paano/, faq: /order/ },
 ];
 
+type ChatProduct = {
+  slug: string;
+  name: string;
+  price: number;
+  compareAtPrice: number | null;
+  category: string;
+  description: string;
+  stock: number | null;
+  featured: boolean;
+  isNew: boolean;
+};
+
+function tokenize(input: string): string[] {
+  return input
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+}
+
+function singular(word: string): string {
+  if (word.endsWith("ies")) return `${word.slice(0, -3)}y`;
+  if (/(ses|xes|zes|ches|shes)$/.test(word)) return word.slice(0, -2);
+  if (word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
+  return word;
+}
+
+function categorySlugs(products: ChatProduct[]): string[] {
+  return Array.from(new Set(products.map((p) => p.category)));
+}
+
+function findCategory(products: ChatProduct[], words: string[]): string | null {
+  for (const slug of categorySlugs(products)) {
+    const s = singular(slug);
+    if (words.some((w) => singular(w) === s)) return slug;
+  }
+  return null;
+}
+
+function matchProducts(products: ChatProduct[], input: string): { product: ChatProduct; score: number }[] {
+  const words = tokenize(input);
+  if (!words.length) return [];
+  const scored: { product: ChatProduct; score: number }[] = [];
+  for (const product of products) {
+    const nameWords = product.name
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter((w) => w.length > 2);
+    const matched = words.filter((w) =>
+      nameWords.some(
+        (nw) =>
+          nw === w ||
+          (nw.startsWith(w) && w.length >= 4) ||
+          (w.startsWith(nw) && nw.length >= 4)
+      )
+    );
+    if (!matched.length) continue;
+    let score = matched.length * 4;
+    if (matched.length === words.length) score += 3;
+    if (matched.length === nameWords.length) score += 1;
+    scored.push({ product, score });
+  }
+  return scored.sort((a, b) => b.score - a.score);
+}
+
+function stockLabel(p: ChatProduct): string {
+  if (p.stock === null) return "in stock";
+  if (p.stock <= 0) return "sold out";
+  if (p.stock <= 5) return `only ${p.stock} left`;
+  return "in stock";
+}
+
+function titleCaseSlug(slug: string): string {
+  return slug.replace(/-/g, " ");
+}
+
 function findFaq(faqs: Faq[], pattern: RegExp): string | null {
   const hit = faqs.find((f) => pattern.test(f.question.toLowerCase()));
   return hit ? hit.answer : null;
 }
 
 function bestFaqMatch(faqs: Faq[], input: string): string | null {
-  const words = input
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+  const words = tokenize(input);
   if (words.length === 0) return null;
 
   let best: { answer: string; score: number } | null = null;
@@ -81,7 +153,8 @@ export default function MessengerChat() {
   const idRef = useRef(0);
   const timersRef = useRef<number[]>([]);
   const startedRef = useRef(false);
-  const minPriceRef = useRef<number | null>(null);
+  const catalogRef = useRef<ChatProduct[] | null>(null);
+  const catalogPromiseRef = useRef<Promise<ChatProduct[]> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -122,29 +195,134 @@ export default function MessengerChat() {
     );
   }
 
-  async function priceAnswer() {
-    if (minPriceRef.current === null) {
-      try {
-        const res = await fetch("/api/catalog");
-        const data = await res.json();
-        const prices: number[] = (data.products ?? [])
-          .map((p: { price?: number }) => p.price)
-          .filter((p: unknown): p is number => typeof p === "number");
-        if (prices.length) minPriceRef.current = Math.min(...prices);
-      } catch {
-        // leave null; answer below still works
-      }
+  async function ensureCatalog(): Promise<ChatProduct[]> {
+    if (catalogRef.current) return catalogRef.current;
+    if (!catalogPromiseRef.current) {
+      catalogPromiseRef.current = fetch("/api/catalog")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          const items: ChatProduct[] = Array.isArray(data?.products) ? data.products : [];
+          catalogRef.current = items;
+          return items;
+        })
+        .catch(() => {
+          catalogRef.current = [];
+          return [];
+        });
     }
-    const min = minPriceRef.current;
+    return catalogPromiseRef.current;
+  }
+
+  function productSummary(p: ChatProduct) {
+    const was = p.compareAtPrice !== null && p.compareAtPrice > p.price ? p.compareAtPrice : null;
+    const lines = [
+      `${p.name} — ${formatPeso(p.price)}${was !== null ? ` (was ${formatPeso(was)})` : ""}.`,
+      `Availability: ${stockLabel(p)}.`,
+    ];
+    const desc = p.description.replace(/\s+/g, " ").trim();
+    if (desc) lines.push(desc.length > 140 ? `${desc.slice(0, 137)}…` : desc);
+    botSay(lines.join("\n"), {
+      ctas: [{ label: "View product", href: `/products/${p.slug}` }],
+      chips: FOLLOW_UPS,
+    });
+  }
+
+  function productPrice(p: ChatProduct) {
+    const was = p.compareAtPrice !== null && p.compareAtPrice > p.price ? p.compareAtPrice : null;
     botSay(
-      min !== null
-        ? `Pieces start at ${formatPeso(min)} — quality streetwear that won't break the bank. Browse the full lineup below.`
-        : "Check the shop for current prices — new drops land regularly.",
+      `${p.name} is ${formatPeso(p.price)}${was !== null ? ` (was ${formatPeso(was)})` : ""} — ${stockLabel(p)}.`,
+      {
+        ctas: [{ label: "View product", href: `/products/${p.slug}` }],
+        chips: FOLLOW_UPS,
+      }
+    );
+  }
+
+  function productStock(p: ChatProduct) {
+    if (p.stock !== null && p.stock <= 0) {
+      botSay(`${p.name} is sold out right now — ask us on Messenger for restock updates.`, {
+        ctas: [{ label: "Continue in Messenger", href: messengerLink }],
+        chips: FOLLOW_UPS,
+      });
+      return;
+    }
+    if (p.stock !== null && p.stock <= 5) {
+      botSay(`Only ${p.stock} left of ${p.name} — it's selling fast.`, {
+        ctas: [{ label: "View product", href: `/products/${p.slug}` }],
+        chips: FOLLOW_UPS,
+      });
+      return;
+    }
+    botSay(`${p.name} is in stock and ready to ship.`, {
+      ctas: [{ label: "View product", href: `/products/${p.slug}` }],
+      chips: FOLLOW_UPS,
+    });
+  }
+
+  function showProductList(title: string, items: ChatProduct[], browseHref: string) {
+    const prices = items.map((p) => p.price);
+    const min = Math.min(...prices);
+    const ctas = items.slice(0, 3).map((p) => ({ label: p.name, href: `/products/${p.slug}` }));
+    ctas.push({ label: "Browse all", href: browseHref });
+    botSay(`${title}\n${items.length} item${items.length !== 1 ? "s" : ""} — starting at ${formatPeso(min)}.`, {
+      ctas,
+      chips: FOLLOW_UPS,
+    });
+  }
+
+  async function generalPrice(products: ChatProduct[]) {
+    if (!products.length) {
+      botSay("Check the shop for current prices — new drops land regularly.", {
+        ctas: [{ label: "Browse products", href: "/products" }],
+        chips: FOLLOW_UPS,
+      });
+      return;
+    }
+    const prices = products.map((p) => p.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    botSay(
+      `Prices range from ${formatPeso(min)} to ${formatPeso(max)} across ${products.length} pieces — quality streetwear that won't break the bank.`,
       {
         ctas: [{ label: "Browse products", href: "/products" }],
         chips: FOLLOW_UPS,
       }
     );
+  }
+
+  function categoryPrice(category: string, products: ChatProduct[]) {
+    const items = products.filter((p) => p.category === category);
+    if (!items.length) {
+      botSay("Check the shop for current prices — new drops land regularly.", {
+        ctas: [{ label: "Browse products", href: "/products" }],
+        chips: FOLLOW_UPS,
+      });
+      return;
+    }
+    const prices = items.map((p) => p.price);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const range = min === max ? formatPeso(min) : `${formatPeso(min)} to ${formatPeso(max)}`;
+    botSay(
+      `${titleCaseSlug(category)} run ${range} across ${items.length} style${items.length !== 1 ? "s" : ""}.`,
+      {
+        ctas: [{ label: `Browse ${titleCaseSlug(category)}`, href: `/products?category=${category}` }],
+        chips: FOLLOW_UPS,
+      }
+    );
+  }
+
+  function recommend(products: ChatProduct[]) {
+    if (!products.length) {
+      botSay("Browse the shop — fresh drops land regularly.", {
+        ctas: [{ label: "Browse products", href: "/products" }],
+        chips: FOLLOW_UPS,
+      });
+      return;
+    }
+    const picks = products.filter((p) => p.featured || p.isNew).slice(0, 3);
+    const items = picks.length ? picks : products.slice(0, 3);
+    showProductList("Here are a few picks you might like:", items, "/products");
   }
 
   async function handleUserInput(raw: string) {
@@ -163,8 +341,85 @@ export default function MessengerChat() {
       botSay("What would you like to know?", { chips: STARTERS });
       return;
     }
+
+    const products = await ensureCatalog();
+    const words = tokenize(lower);
+    const slugs = categorySlugs(products);
+    const contentWords = words.filter(
+      (w) => !slugs.some((s) => singular(w) === singular(s))
+    );
+    const matches = matchProducts(products, lower);
+    const top = matches[0]?.product ?? null;
+    const exactish = top !== null && contentWords.length > 0 && matches[0].score >= 6;
+    const category = findCategory(products, words);
+    const wantsList =
+      /show|browse|see|look|list|check|have|which|what|any|display|sell|offer|carry|got/.test(lower);
+    const generalBrowse =
+      /products?|items?|pieces?|collection|catalog|stuff|everything|sell|offer|carry|range|line/.test(
+        lower
+      );
+
     if (/price|cost|how much|magkano|mura|mahal/.test(lower)) {
-      await priceAnswer();
+      if (exactish && top) {
+        productPrice(top);
+        return;
+      }
+      if (category && contentWords.length === 0) {
+        categoryPrice(category, products);
+        return;
+      }
+      await generalPrice(products);
+      return;
+    }
+
+    if (/stock|available|availability|sold\s*out|ready\s*to\s*ship/.test(lower)) {
+      if (exactish && top) {
+        productStock(top);
+        return;
+      }
+      botSay(
+        "Stock moves fast — most pieces ship ready. Ask about a specific item (e.g. “Tracker Cap”) for its availability.",
+        {
+          ctas: [{ label: "Browse products", href: "/products" }],
+          chips: FOLLOW_UPS,
+        }
+      );
+      return;
+    }
+
+    if (/recommend|suggest|best seller|popular|what should i|favorite|top pick/.test(lower)) {
+      recommend(products);
+      return;
+    }
+
+    if (category && contentWords.length === 0) {
+      const items = products.filter((p) => p.category === category);
+      if (items.length) {
+        showProductList(
+          `Here's what we've got in ${titleCaseSlug(category)}:`,
+          items,
+          `/products?category=${category}`
+        );
+        return;
+      }
+    }
+
+    if (!exactish && wantsList && (category || generalBrowse)) {
+      const items = category ? products.filter((p) => p.category === category) : products;
+      if (items.length) {
+        showProductList(
+          category
+            ? `Here's what we've got in ${titleCaseSlug(category)}:`
+            : "Here's a taste of the shop:",
+          items,
+          category ? `/products?category=${category}` : "/products"
+        );
+        return;
+      }
+    }
+
+    if (exactish && top) {
+      productSummary(top);
       return;
     }
 
@@ -180,6 +435,11 @@ export default function MessengerChat() {
     const matched = bestFaqMatch(faqs, lower);
     if (matched) {
       botSay(matched, { chips: FOLLOW_UPS });
+      return;
+    }
+
+    if (top) {
+      productSummary(top);
       return;
     }
 
@@ -235,13 +495,20 @@ export default function MessengerChat() {
   useEffect(() => {
     if (!open || startedRef.current) return;
     startedRef.current = true;
-    botSay(
-      `Hi! I'm the MicsApparel assistant. Ask me about orders, shipping, prices, and more.`,
-      {
-        chips: STARTERS,
-        ctas: [{ label: "Continue in Messenger", href: messengerLink }],
-      }
-    );
+    setTyping(true);
+    (async () => {
+      const products = await ensureCatalog();
+      const catChips = categorySlugs(products)
+        .slice(0, 2)
+        .map((slug) => `Show me ${titleCaseSlug(slug)}`);
+      botSay(
+        `Hi! I'm the MicsApparel assistant. Ask me about orders, shipping, prices, and more.`,
+        {
+          chips: [...STARTERS, ...catChips],
+          ctas: [{ label: "Continue in Messenger", href: messengerLink }],
+        }
+      );
+    })();
     const t = window.setTimeout(() => inputRef.current?.focus(), 400);
     timersRef.current.push(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
