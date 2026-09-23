@@ -58,6 +58,11 @@ export default function AdminOrders() {
         setMessage(`Order marked as ${status}.`);
         setTimeout(() => setMessage(""), 3000);
         load();
+      } else {
+        const data = await res.json().catch(() => null);
+        setMessage(data?.error || "Failed to update order.");
+        setTimeout(() => setMessage(""), 3000);
+        load();
       }
     } catch {
       setMessage("Failed to update order.");

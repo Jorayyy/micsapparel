@@ -48,10 +48,12 @@ CREATE TABLE IF NOT EXISTS orders (
   order_number text NOT NULL,
   status text NOT NULL,
   data jsonb NOT NULL,
-  created_at timestamptz NOT NULL
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS orders_order_number_key ON orders (order_number);
 CREATE INDEX IF NOT EXISTS orders_created_at_idx ON orders (created_at DESC);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
 
 CREATE TABLE IF NOT EXISTS media (
   id text PRIMARY KEY,
