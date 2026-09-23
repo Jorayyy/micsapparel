@@ -74,11 +74,6 @@ export default function AdminLogin() {
           >
             {loading ? "Logging in…" : "Login"}
           </button>
-
-          <p className="text-neutral-400 text-[11px] text-center mt-5 leading-relaxed">
-            Password is set via the <code className="text-neutral-500">ADMIN_PASSWORD</code>{" "}
-            environment variable.
-          </p>
         </form>
 
         <p className="text-center mt-6">
