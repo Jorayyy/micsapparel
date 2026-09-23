@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useContent } from "@/lib/content-context";
 import { useCart } from "@/lib/cart-context";
 import { messengerUrl } from "@/lib/messenger";
@@ -18,7 +18,7 @@ const navLinks = [
 const bottomLinks = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/products", label: "Shop", icon: "shop" },
-  { href: "/products?focus=search", label: "Search", icon: "search" },
+  { href: "#search", label: "Search", icon: "search" },
   { href: "#cart", label: "Cart", icon: "cart" },
 ];
 
@@ -57,9 +57,13 @@ function NavIcon({ name }: { name: string }) {
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { business } = useContent();
   const { count, open } = useCart();
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 24);
@@ -69,14 +73,37 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSearchOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [searchOpen]);
+
+  useEffect(() => {
     let cancelled = false;
     Promise.resolve().then(() => {
-      if (!cancelled) setIsOpen(false);
+      if (!cancelled) {
+        setIsOpen(false);
+        setSearchOpen(false);
+      }
     });
     return () => {
       cancelled = true;
     };
   }, [pathname]);
+
+  function submitSearch(e: FormEvent) {
+    e.preventDefault();
+    const q = searchValue.trim();
+    router.push(q ? `/products?q=${encodeURIComponent(q)}` : "/products");
+    setSearchOpen(false);
+  }
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -134,13 +161,17 @@ export default function Navbar() {
             </nav>
 
             <div className="flex items-center gap-1 sm:gap-2">
-              <Link
-                href="/products?focus=search"
-                className="p-2.5 text-neutral-600 hover:text-black transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              <button
+                type="button"
+                onClick={() => setSearchOpen((v) => !v)}
+                className={`p-2.5 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                  searchOpen ? "text-black" : "text-neutral-600 hover:text-black"
+                }`}
                 aria-label="Search products"
+                aria-expanded={searchOpen}
               >
                 <NavIcon name="search" />
-              </Link>
+              </button>
 
               <button
                 type="button"
@@ -193,6 +224,28 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+
+        {/* Search dropdown below navbar */}
+        <div
+          className={`overflow-hidden transition-all duration-300 border-t border-transparent ${
+            searchOpen ? "max-h-24 opacity-100 border-neutral-200" : "max-h-0 opacity-0"
+          }`}
+        >
+          <form
+            onSubmit={submitSearch}
+            className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-3"
+          >
+            <input
+              ref={searchInputRef}
+              type="search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Search products"
+              aria-label="Search products"
+              className="w-full px-4 py-2.5 border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors"
+            />
+          </form>
+        </div>
       </header>
 
       {/* Mobile menu */}
@@ -240,6 +293,7 @@ export default function Navbar() {
         <div className="grid grid-cols-4">
           {bottomLinks.map((link) => {
             const isCart = link.icon === "cart";
+            const isSearch = link.icon === "search";
             const content = (
               <>
                 <span className="relative">
@@ -264,6 +318,20 @@ export default function Navbar() {
                   onClick={open}
                   className="flex flex-col items-center justify-center py-2.5 text-neutral-600 hover:text-black transition-colors"
                   aria-label={`Open cart, ${count} items`}
+                >
+                  {content}
+                </button>
+              );
+            }
+
+            if (isSearch) {
+              return (
+                <button
+                  key="search"
+                  type="button"
+                  onClick={() => setSearchOpen(true)}
+                  className="flex flex-col items-center justify-center py-2.5 text-neutral-600 hover:text-black transition-colors"
+                  aria-label="Search products"
                 >
                   {content}
                 </button>
