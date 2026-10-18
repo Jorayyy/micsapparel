@@ -19,7 +19,7 @@ export default function AdminContent() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
-          setBusiness(data.business);
+          setBusiness({ announcements: [], ...data.business });
           setFaqs(data.faqs || []);
         }
       })
@@ -97,6 +97,46 @@ export default function AdminContent() {
 
       {tab === "business" && (
         <div className="space-y-6">
+          <Section title="Announcements (moving banner)">
+            {business.announcements.map((text, index) => (
+              <div key={index} className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Input
+                    label={`Line ${index + 1}`}
+                    value={text}
+                    onChange={(v) =>
+                      setB(
+                        "announcements",
+                        business.announcements.map((t, i) => (i === index ? v : t))
+                      )
+                    }
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setB(
+                      "announcements",
+                      business.announcements.filter((_, i) => i !== index)
+                    )
+                  }
+                  className="mb-px px-4 py-3 text-xs text-red-600 border border-red-200 rounded-lg hover:bg-red-50 tracking-widest uppercase"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setB("announcements", [...business.announcements, "New announcement"])
+              }
+              className={btnSecondary}
+            >
+              + Add Line
+            </button>
+          </Section>
+
           <Section title="Basic Information">
             <div className="grid sm:grid-cols-2 gap-4">
               <Input label="Brand Name" value={business.name} onChange={(v) => setB("name", v)} />

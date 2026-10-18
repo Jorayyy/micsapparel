@@ -122,6 +122,7 @@ export interface Business {
   description: string;
   shortDescription: string;
   motto: string;
+  announcements: string[];
   mission: string;
   founded: string;
   logo: string;

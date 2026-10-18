@@ -12,6 +12,11 @@ export const business: Business = {
   shortDescription:
     "Premium streetwear clothing brand based in Tacloban City, Philippines. Quality caps, hats, and accessories.",
   motto: "WHEN THE TIME IS RIGHT, I. THE LORD WILL MAKE IT HAPPEN. ISAIAH 60:22",
+  announcements: [
+    "Cash on delivery available",
+    "Order 24/7 via Messenger",
+    "Premium streetwear from Tacloban City",
+  ],
   mission:
     "To create premium streetwear that combines faith, fashion, and Filipino pride. Every piece is designed with purpose and built to last.",
   founded: "April 2024",

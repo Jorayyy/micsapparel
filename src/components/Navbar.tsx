@@ -6,8 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useContent } from "@/lib/content-context";
 import { useCart } from "@/lib/cart-context";
 
-const ANNOUNCEMENTS = [
-  "Nationwide shipping across the Philippines",
+const FALLBACK_ANNOUNCEMENTS = [
   "Cash on delivery available",
   "Order 24/7 via Messenger",
   "Premium streetwear from Tacloban City",
@@ -70,6 +69,9 @@ export default function Navbar() {
   const [searchValue, setSearchValue] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { business, categories } = useContent();
+  const announcements = business.announcements?.length
+    ? business.announcements
+    : FALLBACK_ANNOUNCEMENTS;
   const { count, open } = useCart();
   const pathname = usePathname();
   const router = useRouter();
@@ -125,11 +127,11 @@ export default function Navbar() {
                 key={i}
                 className="text-[10px] font-medium tracking-[0.2em] uppercase mx-3"
               >
-                {ANNOUNCEMENTS.join("  \u00b7  ")} {"\u00b7"}{" "}
+                {announcements.join("  \u00b7  ")} {"\u00b7"}{" "}
               </span>
             ))}
           </div>
-          <p className="sr-only">{ANNOUNCEMENTS.join(". ")}</p>
+          <p className="sr-only">{announcements.join(". ")}</p>
         </div>
 
         <header className="bg-white border-b border-neutral-200">
