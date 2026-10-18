@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
-import { getBusiness, getFaqs } from "@/lib/store";
+import { getBusiness, getCategories, getFaqs } from "@/lib/store";
 import { SITE_URL } from "@/lib/site";
 import { organizationJsonLd } from "@/lib/seo";
 
@@ -80,7 +80,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [business, faqs] = await Promise.all([getBusiness(), getFaqs()]);
+  const [business, faqs, categories] = await Promise.all([
+    getBusiness(),
+    getFaqs(),
+    getCategories(),
+  ]);
 
   return (
     <html lang="en">
@@ -93,7 +97,9 @@ export default async function RootLayout({
         />
       </head>
       <body className={`${inter.variable} ${oswald.variable} font-sans antialiased`}>
-        <ClientLayout business={business} faqs={faqs}>{children}</ClientLayout>
+        <ClientLayout business={business} faqs={faqs} categories={categories}>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );

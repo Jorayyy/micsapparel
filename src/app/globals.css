@@ -102,6 +102,10 @@ h1, h2, h3, h4, h5, h6 {
     animation: marquee 28s linear infinite;
   }
 
+  .animate-marquee-banner {
+    animation: marquee 40s linear infinite;
+  }
+
   .animate-chat-pop {
     animation: chat-pop 0.22s ease-out;
   }

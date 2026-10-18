@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { Category, Product } from "@/lib/types";
+import type { Product } from "@/lib/types";
 import ProductCard from "@/components/ProductCard";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 15;
 
 type SortKey = "featured" | "price-asc" | "price-desc" | "newest" | "name";
 
@@ -19,10 +19,9 @@ const SORTS: { key: SortKey; label: string }[] = [
 
 interface ShopBrowserProps {
   products: Product[];
-  categories: Category[];
 }
 
-export default function ShopBrowser({ products, categories }: ShopBrowserProps) {
+export default function ShopBrowser({ products }: ShopBrowserProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -91,33 +90,34 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
 
   return (
     <>
-      {/* Filter bar */}
-      <div className="sticky top-16 lg:top-20 z-30 bg-white/95 backdrop-blur border-y border-neutral-200">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-3 py-3">
-            <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide flex-1">
-              {[{ slug: "all", name: "All" }, ...categories].map((cat) => (
-                <button
-                  key={cat.slug}
-                  type="button"
-                  onClick={() => updateParams({ category: cat.slug === "all" ? null : cat.slug })}
-                  className={`px-4 py-2 text-[11px] font-bold tracking-[0.18em] uppercase whitespace-nowrap transition-colors ${
-                    activeCategory === cat.slug
-                      ? "bg-black text-white"
-                      : "text-neutral-500 hover:text-black hover:bg-neutral-100"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
+      {/* Toolbar */}
+      <div className="bg-white border-b border-neutral-200">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
+          <div className="flex items-center justify-between gap-3 py-3">
+            <p className="text-[11px] tracking-[0.2em] uppercase text-neutral-500">
+              {filtered.length} product{filtered.length !== 1 ? "s" : ""}
+              {query ? ` for “${query}”` : ""}
+            </p>
 
             <div className="flex items-center gap-2">
+              {(activeCategory !== "all" || query || maxPrice > 0) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    router.replace("/products", { scroll: false });
+                    setLimit(PAGE_SIZE);
+                  }}
+                  className="hidden sm:inline text-[11px] tracking-[0.15em] uppercase text-neutral-400 hover:text-black transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+
               <select
                 value={sort}
                 onChange={(e) => updateParams({ sort: e.target.value === "featured" ? null : e.target.value })}
                 aria-label="Sort products"
-                className="px-3 py-2 border border-neutral-300 text-sm bg-white focus:outline-none focus:border-black"
+                className="px-3 py-2 border border-neutral-300 text-[11px] uppercase tracking-[0.1em] bg-white focus:outline-none focus:border-black"
               >
                 {SORTS.map((option) => (
                   <option key={option.key} value={option.key}>
@@ -130,7 +130,7 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
                 value={maxPrice || ""}
                 onChange={(e) => updateParams({ max: e.target.value || null })}
                 aria-label="Maximum price"
-                className="px-3 py-2 border border-neutral-300 text-sm bg-white focus:outline-none focus:border-black"
+                className="px-3 py-2 border border-neutral-300 text-[11px] uppercase tracking-[0.1em] bg-white focus:outline-none focus:border-black"
               >
                 <option value="">Any price</option>
                 <option value="300">Under ₱300</option>
@@ -143,30 +143,11 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
       </div>
 
       {/* Grid */}
-      <section className="py-12 bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-neutral-500 text-sm">
-              {filtered.length} product{filtered.length !== 1 ? "s" : ""}
-              {query ? ` for “${query}”` : ""}
-            </p>
-            {(activeCategory !== "all" || query || maxPrice > 0) && (
-              <button
-                type="button"
-                onClick={() => {
-                  router.replace("/products", { scroll: false });
-                  setLimit(PAGE_SIZE);
-                }}
-                className="text-xs tracking-[0.15em] uppercase text-neutral-500 hover:text-black transition-colors"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
-
+      <section className="py-8 lg:py-10 bg-white">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10">
           {filtered.length === 0 ? (
-            <div className="py-24 text-center border border-neutral-200">
-              <p className="font-oswald text-3xl font-bold text-neutral-300 uppercase mb-4">
+            <div className="py-24 text-center">
+              <p className="text-sm tracking-[0.2em] uppercase text-neutral-400 mb-6">
                 No products found
               </p>
               <button
@@ -174,25 +155,25 @@ export default function ShopBrowser({ products, categories }: ShopBrowserProps) 
                 onClick={() => {
                   router.replace("/products", { scroll: false });
                 }}
-                className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+                className="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
               >
                 View All Products
               </button>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-10">
               {visible.map((product, index) => (
-                <ProductCard key={product.id} product={product} priority={index < 4} />
+                <ProductCard key={product.id} product={product} priority={index < 5} />
               ))}
             </div>
           )}
 
           {filtered.length > visible.length && (
-            <div className="mt-10 text-center">
+            <div className="mt-12 text-center">
               <button
                 type="button"
                 onClick={() => setLimit((value) => value + PAGE_SIZE)}
-                className="px-8 py-4 border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+                className="px-8 py-4 border border-neutral-300 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
               >
                 Load More ({filtered.length - visible.length} remaining)
               </button>

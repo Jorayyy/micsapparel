@@ -7,7 +7,7 @@ export default function Footer() {
   const { business } = useContent();
 
   return (
-    <footer className="bg-white border-t border-neutral-200 pb-16 lg:pb-0">
+    <footer className="bg-white border-t border-neutral-200">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div className="lg:col-span-2">

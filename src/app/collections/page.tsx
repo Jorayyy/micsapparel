@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
-import Reveal from "@/components/Reveal";
 import { getCategories, getProducts } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
@@ -17,73 +16,61 @@ export default async function CollectionsPage() {
   const [categories, products] = await Promise.all([getCategories(), getProducts()]);
 
   return (
-    <>
-      <section className="bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 pt-14 pb-10">
-          <span className="text-[11px] text-neutral-400 tracking-[0.3em] uppercase block mb-3">
+    <section className="bg-white">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8 lg:py-10">
+        <div className="flex items-baseline justify-between mb-10">
+          <h1 className="text-[11px] font-medium tracking-[0.3em] uppercase text-neutral-500">
             Collections
-          </span>
-          <h1 className="font-oswald text-5xl lg:text-7xl font-bold uppercase tracking-tight">
-            Shop the Lineup
           </h1>
-          <p className="text-neutral-500 mt-5 max-w-lg">
-            Browse every MicsApparel category. Small-batch drops, built in Tacloban City.
-          </p>
+          <Link
+            href="/products"
+            className="text-[11px] tracking-[0.2em] uppercase text-neutral-400 hover:text-black transition-colors"
+          >
+            All products
+          </Link>
         </div>
-      </section>
 
-      <section className="pb-20 bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 space-y-16">
-          {categories.map((category, index) => {
+        <div className="space-y-14">
+          {categories.map((category) => {
             const items = products.filter((p) => p.category === category.slug);
             return (
-              <Reveal key={category.id} delay={index * 60}>
-                <div>
-                  <div className="flex flex-wrap items-end justify-between gap-4 mb-7 pb-5 border-b border-neutral-200">
-                    <div>
-                      <span className="text-[11px] text-neutral-400 tracking-[0.3em] uppercase block mb-2">
-                        Collection 0{index + 1}
-                      </span>
-                      <h2 className="font-oswald text-3xl lg:text-4xl font-bold uppercase tracking-tight">
-                        {category.name}
-                      </h2>
-                      <p className="text-neutral-500 text-sm mt-2 max-w-lg">
-                        {category.description}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/products?category=${category.slug}`}
-                      className="text-sm tracking-widest uppercase text-neutral-500 hover:text-black transition-colors"
-                    >
-                      View All ({items.length})
-                    </Link>
-                  </div>
-
-                  {items.length === 0 ? (
-                    <p className="text-neutral-400 text-sm py-6">
-                      New pieces are on the way. Check back soon.
-                    </p>
-                  ) : (
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                      {items.slice(0, 4).map((product) => (
-                        <ProductCard key={product.id} product={product} />
-                      ))}
-                    </div>
-                  )}
+              <div key={category.id}>
+                <div className="flex items-baseline justify-between gap-4 mb-5 pb-4 border-b border-neutral-200">
+                  <h2 className="text-sm font-medium tracking-[0.2em] uppercase">
+                    {category.name}
+                  </h2>
+                  <Link
+                    href={`/products?category=${category.slug}`}
+                    className="text-[11px] tracking-[0.15em] uppercase text-neutral-400 hover:text-black transition-colors"
+                  >
+                    View all ({items.length})
+                  </Link>
                 </div>
-              </Reveal>
+
+                {items.length === 0 ? (
+                  <p className="text-neutral-400 text-sm py-4">
+                    New pieces are on the way. Check back soon.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-10">
+                    {items.slice(0, 5).map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                )}
+              </div>
             );
           })}
 
           {categories.length === 0 && (
-            <div className="py-20 text-center border border-neutral-200">
-              <p className="font-oswald text-2xl font-bold text-neutral-300 uppercase">
+            <div className="py-20 text-center">
+              <p className="text-sm tracking-[0.2em] uppercase text-neutral-400">
                 No collections yet
               </p>
             </div>
           )}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
