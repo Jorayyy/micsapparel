@@ -237,10 +237,9 @@ export default function AdminProducts() {
 
       {!editing && showBulk && (
         <BulkPhotos
-          products={products}
           categories={categories}
           onDone={() => {
-            flash("Photos assigned to products.");
+            flash("Products created from photos.");
             load();
           }}
         />
@@ -830,14 +829,20 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-type BulkItem = { id: string; url: string; filename: string; productId: string };
+type BulkItem = { id: string; url: string; filename: string; name: string };
+
+function prettify(filename: string): string {
+  return filename
+    .replace(/\.[a-z0-9]+$/i, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 function BulkPhotos({
-  products,
   categories,
   onDone,
 }: {
-  products: Product[];
   categories: Category[];
   onDone: () => void;
 }) {
@@ -847,15 +852,6 @@ function BulkPhotos({
   const [status, setStatus] = useState("");
 
   const activeCategory = category || categories[0]?.slug || "";
-  const inCategory = products.filter((p) => p.category === activeCategory);
-
-  function matchProduct(filename: string): string {
-    const base = filename.toLowerCase().replace(/\.[a-z0-9]+$/, "");
-    const hit = [...inCategory]
-      .sort((a, b) => b.slug.length - a.slug.length)
-      .find((p) => base.includes(p.slug));
-    return hit?.id ?? "";
-  }
 
   async function handleFiles(fileList: FileList) {
     setBusy(true);
@@ -872,43 +868,36 @@ function BulkPhotos({
             id: data.media.id,
             url: data.media.url,
             filename: data.media.filename,
-            productId: matchProduct(file.name),
+            name: prettify(data.media.filename),
           });
         }
       } catch {}
     }
     setItems((prev) => [...prev, ...added]);
-    setStatus(`${added.length} photo${added.length === 1 ? "" : "s"} ready to review.`);
+    setStatus(
+      `${added.length} photo${added.length === 1 ? "" : "s"} ready. Rename any, then create.`
+    );
     setBusy(false);
   }
 
-  async function save() {
-    const byProduct = new Map<string, string[]>();
-    for (const it of items) {
-      if (!it.productId) continue;
-      byProduct.set(it.productId, [...(byProduct.get(it.productId) ?? []), it.url]);
-    }
-    if (byProduct.size === 0) {
-      setStatus("Pick a product for at least one photo.");
-      return;
-    }
+  async function create() {
+    if (items.length === 0) return;
     setBusy(true);
-    setStatus("Saving…");
+    setStatus("Creating…");
     let ok = 0;
     let fail = 0;
-    for (const [productId, urls] of byProduct) {
-      const product = products.find((p) => p.id === productId);
-      if (!product) {
-        fail++;
-        continue;
-      }
-      const images = [...product.images];
-      for (const url of urls) if (!images.includes(url)) images.push(url);
+    for (const it of items) {
       try {
         const res = await fetch("/api/admin/products", {
-          method: "PUT",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: productId, images }),
+          body: JSON.stringify({
+            name: it.name.trim() || "Untitled product",
+            price: 0,
+            category: activeCategory,
+            images: [it.url],
+            status: "draft",
+          }),
         });
         if (res.ok) ok++;
         else fail++;
@@ -916,12 +905,14 @@ function BulkPhotos({
         fail++;
       }
     }
-    setItems((prev) => prev.filter((it) => !byProduct.has(it.productId)));
     setStatus(
-      `Assigned to ${ok} product${ok === 1 ? "" : "s"}${fail ? `, ${fail} failed` : ""}.`
+      `Created ${ok} product${ok === 1 ? "" : "s"}${fail ? `, ${fail} failed` : ""}.`
     );
     setBusy(false);
-    if (ok > 0) onDone();
+    if (ok > 0) {
+      setItems([]);
+      onDone();
+    }
   }
 
   return (
@@ -929,7 +920,8 @@ function BulkPhotos({
       <div>
         <h2 className="font-oswald text-lg font-bold uppercase">Bulk Photos</h2>
         <p className="text-neutral-500 text-sm mt-1">
-          Pick a category, select many photos, then confirm the product for each.
+          Pick a category, select many photos. Each photo becomes a draft product named after its
+          file — rename any before creating.
         </p>
       </div>
 
@@ -974,33 +966,27 @@ function BulkPhotos({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={it.url} alt={it.filename} className="w-full h-full object-cover" />
                 </div>
-                <p className="text-xs text-neutral-500 truncate mb-2">{it.filename}</p>
-                <select
-                  value={it.productId}
+                <p className="text-xs text-neutral-400 truncate mb-2">{it.filename}</p>
+                <input
+                  value={it.name}
                   onChange={(e) =>
                     setItems((prev) =>
-                      prev.map((x, i) => (i === index ? { ...x, productId: e.target.value } : x))
+                      prev.map((x, i) => (i === index ? { ...x, name: e.target.value } : x))
                     )
                   }
+                  placeholder="Product name"
                   className={inputCls}
-                >
-                  <option value="">— Assign to product —</option>
-                  {inCategory.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             ))}
           </div>
           <button
             type="button"
-            onClick={save}
+            onClick={create}
             disabled={busy}
             className="px-7 py-3.5 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
           >
-            Assign to products
+            Create {items.length} product{items.length === 1 ? "" : "s"}
           </button>
         </>
       )}
