@@ -175,7 +175,9 @@ async function touchLastUpdated(): Promise<void> {
 export async function getBusiness(): Promise<Business> {
   await ensureReady();
   const rows = await query<{ data: unknown }>("SELECT data FROM business WHERE id = 1");
-  if (rows[0]) return fromJson<Business>(rows[0].data);
+  if (rows[0]) {
+    return { ...structuredClone(seedBusiness), ...fromJson<Business>(rows[0].data) };
+  }
   return structuredClone(seedBusiness);
 }
 
