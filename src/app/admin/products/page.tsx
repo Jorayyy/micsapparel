@@ -34,6 +34,8 @@ export default function AdminProducts() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [marked, setMarked] = useState<string[]>([]);
+  const markedIds = marked.filter((id) => products.some((p) => p.id === id));
 
   async function load() {
     setLoading(true);
@@ -144,6 +146,50 @@ export default function AdminProducts() {
     }
   }
 
+  function toggleMark(id: string) {
+    setMarked((m) => (m.includes(id) ? m.filter((x) => x !== id) : [...m, id]));
+  }
+
+  async function handleDeleteMarked() {
+    if (markedIds.length === 0) return;
+    if (!confirm(`Delete ${markedIds.length} product${markedIds.length !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+    try {
+      const results = await Promise.all(
+        markedIds.map((id) =>
+          fetch("/api/admin/products", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+          })
+        )
+      );
+      const failed = results.filter((r) => !r.ok).length;
+      setMarked([]);
+      flash(failed ? `Failed to delete ${failed} product(s).` : "Marked products deleted.", failed > 0);
+      load();
+    } catch {
+      flash("Connection error", true);
+    }
+  }
+
+  async function toggleFeatured(product: Product) {
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: product.id, featured: !product.featured }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        flash(data.error || "Failed to update", true);
+        return;
+      }
+      setProducts((list) => list.map((p) => (p.id === product.id ? data.product : p)));
+    } catch {
+      flash("Connection error", true);
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4 mb-9">
@@ -191,9 +237,39 @@ export default function AdminProducts() {
         <p className="text-neutral-400 text-sm py-10">Loading…</p>
       ) : (
         <div className="space-y-3">
+          {markedIds.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-lg bg-neutral-100">
+              <span className="text-sm text-neutral-600">
+                {markedIds.length} marked for deletion
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMarked([])}
+                  className="px-4 py-2 text-xs border border-neutral-300 rounded-lg hover:bg-white transition-all tracking-widest uppercase"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteMarked}
+                  className="px-4 py-2 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all tracking-widest uppercase"
+                >
+                  Delete marked ({markedIds.length})
+                </button>
+              </div>
+            </div>
+          )}
           {products.map((product) => (
             <div key={product.id} className="bg-white border border-neutral-200 rounded-lg p-5">
               <div className="flex flex-wrap items-center gap-5">
+                <input
+                  type="checkbox"
+                  checked={marked.includes(product.id)}
+                  onChange={() => toggleMark(product.id)}
+                  aria-label={`Mark ${product.name} for deletion`}
+                  className="w-4 h-4 accent-black shrink-0"
+                />
                 <div className="w-16 h-16 bg-neutral-100 rounded-md shrink-0 overflow-hidden">
                   {product.images[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -220,6 +296,17 @@ export default function AdminProducts() {
                   <p className="text-neutral-400 text-xs mt-0.5">/{product.slug}</p>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleFeatured(product)}
+                    className={`px-4 py-2 text-xs border transition-all tracking-widest uppercase ${
+                      product.featured
+                        ? "border-black bg-black text-white hover:bg-neutral-800"
+                        : "border-neutral-300 hover:bg-neutral-50"
+                    }`}
+                  >
+                    {product.featured ? "Featured" : "Mark"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
