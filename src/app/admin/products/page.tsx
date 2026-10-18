@@ -35,6 +35,7 @@ export default function AdminProducts() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [marked, setMarked] = useState<string[]>([]);
+  const [showBulk, setShowBulk] = useState(false);
   const markedIds = marked.filter((id) => products.some((p) => p.id === id));
 
   async function load() {
@@ -220,6 +221,29 @@ export default function AdminProducts() {
         <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
           {error}
         </div>
+      )}
+
+      {!editing && (
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => setShowBulk((v) => !v)}
+            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors"
+          >
+            {showBulk ? "Close Bulk Photos" : "Bulk Photos"}
+          </button>
+        </div>
+      )}
+
+      {!editing && showBulk && (
+        <BulkPhotos
+          products={products}
+          categories={categories}
+          onDone={() => {
+            flash("Photos assigned to products.");
+            load();
+          }}
+        />
       )}
 
       {editing ? (
@@ -802,6 +826,184 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
         {label}
       </label>
       {children}
+    </div>
+  );
+}
+
+type BulkItem = { id: string; url: string; filename: string; productId: string };
+
+function BulkPhotos({
+  products,
+  categories,
+  onDone,
+}: {
+  products: Product[];
+  categories: Category[];
+  onDone: () => void;
+}) {
+  const [category, setCategory] = useState(categories[0]?.slug ?? "");
+  const [items, setItems] = useState<BulkItem[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState("");
+
+  const activeCategory = category || categories[0]?.slug || "";
+  const inCategory = products.filter((p) => p.category === activeCategory);
+
+  function matchProduct(filename: string): string {
+    const base = filename.toLowerCase().replace(/\.[a-z0-9]+$/, "");
+    const hit = [...inCategory]
+      .sort((a, b) => b.slug.length - a.slug.length)
+      .find((p) => base.includes(p.slug));
+    return hit?.id ?? "";
+  }
+
+  async function handleFiles(fileList: FileList) {
+    setBusy(true);
+    setStatus("Uploading…");
+    const added: BulkItem[] = [];
+    for (const file of Array.from(fileList)) {
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (res.ok && data.media) {
+          added.push({
+            id: data.media.id,
+            url: data.media.url,
+            filename: data.media.filename,
+            productId: matchProduct(file.name),
+          });
+        }
+      } catch {}
+    }
+    setItems((prev) => [...prev, ...added]);
+    setStatus(`${added.length} photo${added.length === 1 ? "" : "s"} ready to review.`);
+    setBusy(false);
+  }
+
+  async function save() {
+    const byProduct = new Map<string, string[]>();
+    for (const it of items) {
+      if (!it.productId) continue;
+      byProduct.set(it.productId, [...(byProduct.get(it.productId) ?? []), it.url]);
+    }
+    if (byProduct.size === 0) {
+      setStatus("Pick a product for at least one photo.");
+      return;
+    }
+    setBusy(true);
+    setStatus("Saving…");
+    let ok = 0;
+    let fail = 0;
+    for (const [productId, urls] of byProduct) {
+      const product = products.find((p) => p.id === productId);
+      if (!product) {
+        fail++;
+        continue;
+      }
+      const images = [...product.images];
+      for (const url of urls) if (!images.includes(url)) images.push(url);
+      try {
+        const res = await fetch("/api/admin/products", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: productId, images }),
+        });
+        if (res.ok) ok++;
+        else fail++;
+      } catch {
+        fail++;
+      }
+    }
+    setItems((prev) => prev.filter((it) => !byProduct.has(it.productId)));
+    setStatus(
+      `Assigned to ${ok} product${ok === 1 ? "" : "s"}${fail ? `, ${fail} failed` : ""}.`
+    );
+    setBusy(false);
+    if (ok > 0) onDone();
+  }
+
+  return (
+    <div className="bg-white border border-neutral-200 rounded-lg p-6 mb-6 space-y-4">
+      <div>
+        <h2 className="font-oswald text-lg font-bold uppercase">Bulk Photos</h2>
+        <p className="text-neutral-500 text-sm mt-1">
+          Pick a category, select many photos, then confirm the product for each.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3">
+        <Field label="Category for this batch">
+          <select
+            value={activeCategory}
+            onChange={(e) => setCategory(e.target.value)}
+            className={`${inputCls} min-w-[200px]`}
+          >
+            {categories.map((c) => (
+              <option key={c.id} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <label className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors cursor-pointer">
+          {busy ? "Working…" : "Select Photos"}
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            disabled={busy}
+            onChange={(e) => {
+              if (e.target.files?.length) handleFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      </div>
+
+      {status && <p className="text-sm text-neutral-500">{status}</p>}
+
+      {items.length > 0 && (
+        <>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((it, index) => (
+              <div key={it.id} className="border border-neutral-200 rounded-lg p-3">
+                <div className="aspect-square bg-neutral-100 rounded-md mb-2 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={it.url} alt={it.filename} className="w-full h-full object-cover" />
+                </div>
+                <p className="text-xs text-neutral-500 truncate mb-2">{it.filename}</p>
+                <select
+                  value={it.productId}
+                  onChange={(e) =>
+                    setItems((prev) =>
+                      prev.map((x, i) => (i === index ? { ...x, productId: e.target.value } : x))
+                    )
+                  }
+                  className={inputCls}
+                >
+                  <option value="">— Assign to product —</option>
+                  {inCategory.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={save}
+            disabled={busy}
+            className="px-7 py-3.5 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
+          >
+            Assign to products
+          </button>
+        </>
+      )}
     </div>
   );
 }
