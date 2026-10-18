@@ -345,7 +345,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function SaveButton({ saving, onClick }: { saving: boolean; onClick: () => void }) {
   return (
-    <div className="pt-5 border-t border-neutral-200">
+    <div className="sticky bottom-0 z-10 pt-5 bg-white border-t border-neutral-200">
       <button
         type="button"
         onClick={onClick}
