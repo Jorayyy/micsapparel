@@ -32,7 +32,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
     <section className="bg-white">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14">
         <div className="text-center mb-10">
-          <div className="w-14 h-14 mx-auto bg-black text-white flex items-center justify-center mb-5">
+          <div className="w-14 h-14 mx-auto rounded-lg bg-black text-white flex items-center justify-center mb-5">
             <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -49,7 +49,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        <div className="border border-neutral-200">
+        <div className="border border-neutral-200 rounded-lg overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-neutral-50 border-b border-neutral-200">
             <div>
               <p className="text-[10px] text-neutral-400 tracking-[0.2em] uppercase">
@@ -72,7 +72,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
           <div className="p-6 space-y-4">
             {order.items.map((item, index) => (
               <div key={`${item.productId}-${index}`} className="flex gap-4">
-                <div className="w-16 h-20 bg-neutral-100 shrink-0 overflow-hidden">
+                <div className="w-16 h-20 rounded-md bg-neutral-100 shrink-0 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={item.image} alt="" className="w-full h-full object-cover" />
                 </div>
@@ -140,13 +140,13 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
               href={messenger}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-4 bg-black text-white text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+              className="py-4 rounded-lg bg-black text-white text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
             >
               Confirm on Messenger
             </a>
             <Link
               href="/products"
-              className="py-4 border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+              className="py-4 rounded-lg border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
             >
               Continue Shopping
             </Link>

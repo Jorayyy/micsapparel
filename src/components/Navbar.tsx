@@ -183,7 +183,7 @@ export default function Navbar() {
                     <Icon name="search" />
                   </button>
                   <div
-                    className={`absolute top-full right-0 mt-2 w-64 bg-white border shadow-sm overflow-hidden transition-all duration-300 ${
+                    className={`absolute top-full right-0 mt-2 w-64 bg-white border rounded-lg shadow-sm overflow-hidden transition-all duration-300 ${
                       searchOpen
                         ? "max-h-24 opacity-100 border-neutral-200"
                         : "max-h-0 opacity-0 border-transparent shadow-none pointer-events-none"
@@ -211,7 +211,7 @@ export default function Navbar() {
                 >
                   <Icon name="cart" />
                   {count > 0 && (
-                    <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 bg-black text-white text-[9px] font-bold flex items-center justify-center">
+                    <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-black text-white text-[9px] font-bold flex items-center justify-center">
                       {count}
                     </span>
                   )}

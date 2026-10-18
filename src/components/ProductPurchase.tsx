@@ -116,7 +116,7 @@ export default function ProductPurchase({ product }: ProductPurchaseProps) {
             </span>
           )}
           {product.badge && (
-            <span className="px-2.5 py-1 bg-black text-white text-[10px] font-bold tracking-widest uppercase">
+            <span className="px-2.5 py-1 rounded-md bg-black text-white text-[10px] font-bold tracking-widest uppercase">
               {product.badge}
             </span>
           )}
@@ -167,7 +167,7 @@ export default function ProductPurchase({ product }: ProductPurchaseProps) {
       ))}
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="flex items-center border border-neutral-300">
+        <div className="flex items-center border border-neutral-300 rounded-lg overflow-hidden">
           <button
             type="button"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -212,7 +212,7 @@ export default function ProductPurchase({ product }: ProductPurchaseProps) {
           )}
           target="_blank"
           rel="noopener noreferrer"
-          className="py-4 border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+          className="py-4 rounded-lg border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
         >
           Ask via Messenger
         </a>
@@ -243,7 +243,7 @@ export default function ProductPurchase({ product }: ProductPurchaseProps) {
               <a
                 key={item.slug}
                 href={`/products/${item.slug}`}
-                className="group block bg-neutral-100 p-3 hover:bg-neutral-200 transition-colors"
+                className="group block rounded-lg bg-neutral-100 p-3 hover:bg-neutral-200 transition-colors"
               >
                 <p className="font-oswald text-xs font-semibold uppercase truncate">
                   {item.name}

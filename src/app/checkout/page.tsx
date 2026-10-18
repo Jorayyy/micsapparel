@@ -87,7 +87,7 @@ export default function CheckoutPage() {
           </p>
           <Link
             href="/products"
-            className="inline-flex px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+            className="inline-flex px-8 py-4 rounded-lg bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
           >
             Shop Products
           </Link>
@@ -108,7 +108,7 @@ export default function CheckoutPage() {
 
         <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-10">
           <div className="lg:col-span-2 space-y-8">
-            <fieldset className="border border-neutral-200 p-6">
+            <fieldset className="border border-neutral-200 rounded-lg p-6">
               <legend className="px-2 font-oswald text-xs font-bold tracking-[0.2em] uppercase">
                 Contact Information
               </legend>
@@ -140,7 +140,7 @@ export default function CheckoutPage() {
               </div>
             </fieldset>
 
-            <fieldset className="border border-neutral-200 p-6">
+            <fieldset className="border border-neutral-200 rounded-lg p-6">
               <legend className="px-2 font-oswald text-xs font-bold tracking-[0.2em] uppercase">
                 Shipping Address
               </legend>
@@ -189,7 +189,7 @@ export default function CheckoutPage() {
               </div>
             </fieldset>
 
-            <fieldset className="border border-neutral-200 p-6">
+            <fieldset className="border border-neutral-200 rounded-lg p-6">
               <legend className="px-2 font-oswald text-xs font-bold tracking-[0.2em] uppercase">
                 Payment Method
               </legend>
@@ -197,7 +197,7 @@ export default function CheckoutPage() {
                 {PAYMENT_OPTIONS.map((option) => (
                   <label
                     key={option.value}
-                    className={`flex items-start gap-3 p-4 border cursor-pointer transition-colors ${
+                    className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${
                       payment === option.value
                         ? "border-black bg-neutral-50"
                         : "border-neutral-200 hover:border-neutral-400"
@@ -229,7 +229,7 @@ export default function CheckoutPage() {
             </fieldset>
           </div>
 
-          <aside className="lg:sticky lg:top-28 h-fit border border-neutral-200 p-6 space-y-4">
+          <aside className="lg:sticky lg:top-28 h-fit border border-neutral-200 rounded-lg p-6 space-y-4">
             <h2 className="font-oswald text-lg font-bold uppercase tracking-widest">
               Your Order
             </h2>
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
             <ul className="space-y-3 max-h-72 overflow-y-auto">
               {items.map((item) => (
                 <li key={item.key} className="flex gap-3">
-                  <div className="w-14 h-16 bg-neutral-100 shrink-0 overflow-hidden">
+                  <div className="w-14 h-16 rounded-md bg-neutral-100 shrink-0 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.image}
@@ -277,7 +277,7 @@ export default function CheckoutPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2">
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {error}
               </p>
             )}

@@ -95,7 +95,7 @@ export default async function ContactPage() {
                 href={card.href}
                 target={card.href.startsWith("http") ? "_blank" : undefined}
                 rel={card.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="p-7 bg-neutral-50 border border-neutral-100 hover:bg-white hover:border-neutral-300 hover:shadow-sm transition-all group"
+                className="p-7 rounded-lg bg-neutral-50 border border-neutral-100 hover:bg-white hover:border-neutral-300 hover:shadow-sm transition-all group"
               >
                 <div className="mb-5 text-black">{card.icon}</div>
                 <h2 className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-400 mb-2">
@@ -166,7 +166,7 @@ export default async function ContactPage() {
             href={business.social.messenger}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+            className="inline-flex px-8 py-4 rounded-lg bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
           >
             Order Now
           </a>

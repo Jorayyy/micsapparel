@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getOrders, getProducts, getCategories, getReviews, getMedia } from "@/lib/store";
 import { formatPeso } from "@/lib/format";
+import { cardCls, chipCls, PageHeader } from "./ui";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,14 @@ const cards = [
   { href: "/admin/media", label: "Media", desc: "Upload and manage images" },
   { href: "/admin/logo", label: "Logo", desc: "Update the brand logo" },
 ];
+
+const STATUS_CHIP: Record<string, string> = {
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  confirmed: "bg-blue-50 text-blue-700 border-blue-200",
+  shipped: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  delivered: "bg-green-50 text-green-700 border-green-200",
+  cancelled: "bg-red-50 text-red-700 border-red-200",
+};
 
 export default async function AdminDashboard() {
   const [orders, products, categories, reviews, media] = await Promise.all([
@@ -40,16 +49,11 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-9">
-        <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">
-          Dashboard
-        </h1>
-        <p className="text-neutral-500 mt-2 text-sm">Manage your MicsApparel store</p>
-      </div>
+      <PageHeader title="Dashboard" subtitle="Manage your MicsApparel store" />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-white border border-neutral-200 p-5">
+          <div key={stat.label} className={`${cardCls} p-5`}>
             <p className="text-neutral-400 text-[10px] tracking-[0.2em] uppercase mb-1.5">
               {stat.label}
             </p>
@@ -63,7 +67,7 @@ export default async function AdminDashboard() {
           <Link
             key={card.href}
             href={card.href}
-            className="p-6 bg-white border border-neutral-200 hover:border-black hover:shadow-sm transition-all group"
+            className={`${cardCls} p-6 hover:border-black hover:shadow-sm transition-all group`}
           >
             <h2 className="font-oswald text-lg font-bold uppercase tracking-wide group-hover:text-neutral-600 transition-colors">
               {card.label}
@@ -73,8 +77,8 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      <div className="mt-12 grid lg:grid-cols-2 gap-4">
-        <div className="bg-white border border-neutral-200 p-6">
+      <div className="mt-8 grid lg:grid-cols-2 gap-4">
+        <div className={`${cardCls} p-6`}>
           <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-4">
             Recent Orders
           </h3>
@@ -92,9 +96,9 @@ export default async function AdminDashboard() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-medium">{formatPeso(order.total)}</p>
-                    <p className="text-[10px] uppercase tracking-widest text-neutral-400">
+                    <span className={`${chipCls} ${STATUS_CHIP[order.status] ?? ""} mt-1`}>
                       {order.status}
-                    </p>
+                    </span>
                   </div>
                 </li>
               ))}
@@ -110,7 +114,7 @@ export default async function AdminDashboard() {
           )}
         </div>
 
-        <div className="bg-white border border-neutral-200 p-6">
+        <div className={`${cardCls} p-6`}>
           <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-4">
             Store Health
           </h3>

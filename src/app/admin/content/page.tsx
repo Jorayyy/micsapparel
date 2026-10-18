@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Business, Faq } from "@/lib/types";
+import { Alert, btnPrimary, btnSecondary, cardCls, inputCls, PageHeader } from "../ui";
 
 type Tab = "business" | "faqs";
 
@@ -64,12 +65,10 @@ export default function AdminContent() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">Content</h1>
-        <p className="text-neutral-500 mt-2 text-sm">
-          Business information, FAQs — saved on the server so every visitor sees it
-        </p>
-      </div>
+      <PageHeader
+        title="Content"
+        subtitle="Business information, FAQs — saved on the server so every visitor sees it"
+      />
 
       <div className="flex items-center gap-1 mb-7 border-b border-neutral-200">
         {(
@@ -82,7 +81,7 @@ export default function AdminContent() {
             key={item.key}
             type="button"
             onClick={() => setTab(item.key)}
-            className={`px-5 py-3 text-[11px] font-bold tracking-[0.2em] uppercase border-b-2 transition-colors ${
+            className={`px-5 py-3 text-[11px] font-bold tracking-[0.2em] uppercase border-b-2 rounded-t-lg transition-colors ${
               tab === item.key
                 ? "text-black border-black"
                 : "text-neutral-400 border-transparent hover:text-neutral-700"
@@ -93,16 +92,8 @@ export default function AdminContent() {
         ))}
       </div>
 
-      {message && (
-        <div className="mb-5 px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm">
-          {message}
-        </div>
-      )}
-      {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      {message && <Alert>{message}</Alert>}
+      {error && <Alert tone="error">{error}</Alert>}
 
       {tab === "business" && (
         <div className="space-y-6">
@@ -241,7 +232,7 @@ export default function AdminContent() {
       {tab === "faqs" && (
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <div key={faq.id} className="bg-white border border-neutral-200 p-5">
+            <div key={faq.id} className={`${cardCls} p-5`}>
               <div className="flex items-start justify-between gap-3 mb-3">
                 <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-400">
                   FAQ {index + 1}
@@ -289,7 +280,7 @@ export default function AdminContent() {
                 },
               ])
             }
-            className="px-5 py-3 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-white transition-colors"
+            className={btnSecondary}
           >
             + Add FAQ
           </button>
@@ -303,7 +294,7 @@ export default function AdminContent() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-neutral-200 p-6">
+    <div className={`${cardCls} p-6`}>
       <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-5">
         {title}
       </h3>
@@ -319,7 +310,7 @@ function SaveButton({ saving, onClick }: { saving: boolean; onClick: () => void 
         type="button"
         onClick={onClick}
         disabled={saving}
-        className="px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
+        className={btnPrimary}
       >
         {saving ? "Saving…" : "Save Changes"}
       </button>
@@ -329,9 +320,6 @@ function SaveButton({ saving, onClick }: { saving: boolean; onClick: () => void 
     </div>
   );
 }
-
-const inputCls =
-  "w-full px-3.5 py-2.5 bg-white border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors";
 
 function Input({
   label,

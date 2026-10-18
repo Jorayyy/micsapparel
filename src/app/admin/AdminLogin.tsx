@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { btnPrimary, inputCls } from "./ui";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-neutral-100 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto bg-black flex items-center justify-center font-oswald text-2xl font-bold text-white mb-4">
+          <div className="w-16 h-16 mx-auto bg-black rounded-2xl flex items-center justify-center font-oswald text-2xl font-bold text-white mb-4">
             MA
           </div>
           <h1 className="font-oswald text-3xl font-bold uppercase tracking-wider">
@@ -50,7 +51,7 @@ export default function AdminLogin() {
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white p-8 border border-neutral-200 shadow-sm"
+          className="bg-white p-8 rounded-2xl border border-neutral-200 shadow-sm"
         >
           <label className="block text-[11px] font-bold text-neutral-500 tracking-[0.2em] uppercase mb-3">
             Password
@@ -59,19 +60,19 @@ export default function AdminLogin() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3.5 bg-neutral-50 border border-neutral-200 text-sm focus:outline-none focus:border-black transition-colors placeholder:text-neutral-400"
+            className={`${inputCls} bg-neutral-50 py-3.5 placeholder:text-neutral-400`}
             placeholder="Enter password"
             autoFocus
             required
           />
 
-          {error && <p className="text-red-600 text-sm mt-4">{error}</p>}
+          {error && (
+            <p className="text-red-600 text-sm mt-4 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-5 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading} className={`${btnPrimary} w-full mt-5 py-4`}>
             {loading ? "Logging in…" : "Login"}
           </button>
         </form>

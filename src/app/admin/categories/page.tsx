@@ -2,6 +2,17 @@
 
 import { useEffect, useState } from "react";
 import type { Category } from "@/lib/types";
+import {
+  Alert,
+  btnPrimary,
+  btnSecondary,
+  btnSmall,
+  btnSmallDanger,
+  cardCls,
+  chipCls,
+  inputCls,
+  PageHeader,
+} from "../ui";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -88,38 +99,28 @@ export default function AdminCategories() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-9">
-        <div>
-          <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">
-            Categories
-          </h1>
-          <p className="text-neutral-500 mt-2 text-sm">Organize products into collections</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(empty);
-            setIsNew(true);
-          }}
-          className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
-        >
-          + Add Category
-        </button>
-      </div>
+      <PageHeader
+        title="Categories"
+        subtitle="Organize products into collections"
+        action={
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(empty);
+              setIsNew(true);
+            }}
+            className={btnPrimary}
+          >
+            + Add Category
+          </button>
+        }
+      />
 
-      {message && (
-        <div className="mb-5 px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm">
-          {message}
-        </div>
-      )}
-      {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      {message && <Alert>{message}</Alert>}
+      {error && <Alert tone="error">{error}</Alert>}
 
       {editing && (
-        <div className="bg-white border border-neutral-200 p-6 mb-6 space-y-4">
+        <div className={`${cardCls} p-6 mb-6 space-y-4`}>
           <h2 className="font-oswald text-lg font-bold uppercase">
             {isNew ? "New Category" : `Edit: ${editing.name}`}
           </h2>
@@ -184,11 +185,7 @@ export default function AdminCategories() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => save(editing)}
-              className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800"
-            >
+            <button type="button" onClick={() => save(editing)} className={btnPrimary}>
               Save
             </button>
             <button
@@ -197,7 +194,7 @@ export default function AdminCategories() {
                 setEditing(null);
                 setIsNew(false);
               }}
-              className="px-6 py-3 border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50"
+              className={btnSecondary}
             >
               Cancel
             </button>
@@ -207,15 +204,12 @@ export default function AdminCategories() {
 
       <div className="space-y-3">
         {categories.map((category) => (
-          <div
-            key={category.id}
-            className="bg-white border border-neutral-200 p-5 flex flex-wrap items-center gap-4"
-          >
+          <div key={category.id} className={`${cardCls} p-5 flex flex-wrap items-center gap-4`}>
             <div className="flex-1 min-w-[200px]">
               <div className="flex items-center gap-2">
                 <h3 className="font-oswald text-lg font-bold uppercase">{category.name}</h3>
                 <span
-                  className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                  className={`${chipCls} ${
                     category.status === "active"
                       ? "bg-green-50 text-green-700 border-green-200"
                       : "bg-neutral-100 text-neutral-500 border-neutral-200"
@@ -236,14 +230,14 @@ export default function AdminCategories() {
                   setEditing(category);
                   setIsNew(false);
                 }}
-                className="px-4 py-2 text-xs border border-neutral-300 hover:bg-neutral-50 tracking-widest uppercase"
+                className={btnSmall}
               >
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => remove(category.id)}
-                className="px-4 py-2 text-xs text-red-600 border border-red-200 hover:bg-red-50 tracking-widest uppercase"
+                className={btnSmallDanger}
               >
                 Delete
               </button>
@@ -254,6 +248,3 @@ export default function AdminCategories() {
     </div>
   );
 }
-
-const inputCls =
-  "w-full px-3.5 py-2.5 bg-white border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors";

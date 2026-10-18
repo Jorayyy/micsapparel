@@ -543,7 +543,7 @@ export default function MessengerChat() {
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed z-[55] left-3 right-3 top-20 bottom-36 sm:left-auto sm:right-4 sm:bottom-36 sm:w-[380px] sm:h-[min(540px,calc(100dvh-220px))] sm:top-auto lg:right-6 lg:bottom-24 lg:h-[min(540px,calc(100dvh-160px))] bg-white border border-neutral-200 shadow-2xl flex flex-col animate-chat-pop"
+          className="fixed z-[55] left-3 right-3 top-20 bottom-36 sm:left-auto sm:right-4 sm:bottom-36 sm:w-[380px] sm:h-[min(540px,calc(100dvh-220px))] sm:top-auto lg:right-6 lg:bottom-24 lg:h-[min(540px,calc(100dvh-160px))] bg-white border border-neutral-200 rounded-lg shadow-2xl flex flex-col animate-chat-pop"
           role="dialog"
           aria-label="Chat with MicsApparel"
         >

@@ -75,7 +75,7 @@ export default async function AboutPage() {
             {business.values.map((value, i) => (
               <div
                 key={value.title}
-                className="p-7 bg-white border border-neutral-200 hover:shadow-sm transition-all"
+                className="p-7 rounded-lg bg-white border border-neutral-200 hover:shadow-sm transition-all"
               >
                 <span className="font-oswald text-4xl font-bold text-neutral-100">
                   0{i + 1}
@@ -144,13 +144,13 @@ export default async function AboutPage() {
               href={business.social.facebook}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+              className="px-8 py-4 rounded-lg bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
             >
               Follow on Facebook
             </a>
             <Link
               href="/products"
-              className="px-8 py-4 border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-white transition-colors"
+              className="px-8 py-4 rounded-lg border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-white transition-colors"
             >
               Shop Now
             </Link>

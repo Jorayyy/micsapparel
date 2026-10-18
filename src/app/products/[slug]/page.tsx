@@ -105,7 +105,7 @@ export default async function ProductPage({ params }: PageProps) {
 
           <div className="grid lg:grid-cols-2 gap-10">
             <div className="space-y-4">
-              <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden group">
+              <div className="relative aspect-[4/5] rounded-lg bg-neutral-100 overflow-hidden group">
                 <ProductImage
                   src={product.images[0] ?? ""}
                   alt={product.name}
@@ -114,7 +114,7 @@ export default async function ProductPage({ params }: PageProps) {
                   priority
                 />
                 {product.badge && (
-                  <div className="absolute top-4 left-4 px-3 py-1.5 bg-white text-black text-[10px] font-bold tracking-widest uppercase">
+                  <div className="absolute top-4 left-4 px-3 py-1.5 rounded-md bg-white text-black text-[10px] font-bold tracking-widest uppercase">
                     {product.badge}
                   </div>
                 )}
@@ -125,7 +125,7 @@ export default async function ProductPage({ params }: PageProps) {
                   {product.images.slice(1, 5).map((image, i) => (
                     <div
                       key={`${image}-${i}`}
-                      className="relative aspect-square bg-neutral-100 overflow-hidden group"
+                      className="relative aspect-square rounded-md bg-neutral-100 overflow-hidden group"
                     >
                       <ProductImage
                         src={image}

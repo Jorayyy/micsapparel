@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Business } from "@/lib/types";
+import { Alert, btnPrimary, btnSecondary, cardCls, inputCls, PageHeader } from "../ui";
 
 export default function AdminLogo() {
   const [business, setBusiness] = useState<Business | null>(null);
@@ -51,19 +52,17 @@ export default function AdminLogo() {
 
   return (
     <div>
-      <div className="mb-9">
-        <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">Logo</h1>
-        <p className="text-neutral-500 mt-2 text-sm">
-          Brand logo shown in the navbar, footer, and about sections
-        </p>
-      </div>
+      <PageHeader
+        title="Logo"
+        subtitle="Brand logo shown in the navbar, footer, and about sections"
+      />
 
       <div className="grid lg:grid-cols-2 gap-8">
-        <div className="bg-white border border-neutral-200 p-7">
+        <div className={`${cardCls} p-7`}>
           <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-5">
             Preview
           </h3>
-          <div className="flex items-center justify-center py-10 bg-neutral-50">
+          <div className="flex items-center justify-center py-10 bg-neutral-50 rounded-lg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={logoUrl}
@@ -94,7 +93,7 @@ export default function AdminLogo() {
           </div>
         </div>
 
-        <div className="bg-white border border-neutral-200 p-7 space-y-5">
+        <div className={`${cardCls} p-7 space-y-5`}>
           <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase">
             Update Logo
           </h3>
@@ -107,7 +106,7 @@ export default function AdminLogo() {
               type="url"
               value={logoUrl}
               onChange={(e) => setLogoUrl(e.target.value)}
-              className="w-full px-4 py-3.5 bg-white border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors"
+              className={inputCls}
               placeholder="https://example.com/logo.jpg"
             />
             <p className="text-neutral-400 text-xs mt-2">
@@ -115,30 +114,22 @@ export default function AdminLogo() {
             </p>
           </div>
 
-          {message && (
-            <p className="text-sm bg-neutral-50 border border-neutral-200 px-4 py-3">
-              {message}
-            </p>
-          )}
-          {error && (
-            <p className="text-sm bg-red-50 border border-red-200 text-red-700 px-4 py-3">
-              {error}
-            </p>
-          )}
+          {message && <Alert>{message}</Alert>}
+          {error && <Alert tone="error">{error}</Alert>}
 
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => save(logoUrl)}
               disabled={saving || !logoUrl}
-              className="px-6 py-3.5 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              className={btnPrimary}
             >
               {saving ? "Saving…" : "Save Logo"}
             </button>
             <button
               type="button"
               onClick={() => save(DEFAULT_LOGO)}
-              className="px-6 py-3.5 border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+              className={btnSecondary}
             >
               Reset to Default
             </button>
@@ -152,7 +143,7 @@ export default function AdminLogo() {
               <button
                 type="button"
                 onClick={() => setLogoUrl(DEFAULT_LOGO)}
-                className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
+                className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
               >
                 Local MA Logo (default)
               </button>
@@ -163,7 +154,7 @@ export default function AdminLogo() {
                     "https://ui-avatars.com/api/?name=MA&background=000&color=fff&size=400&bold=true&font=oswald"
                   )
                 }
-                className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
+                className="block w-full text-left px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-600 hover:text-black hover:border-neutral-400 transition-all"
               >
                 Generated MA Avatar
               </button>

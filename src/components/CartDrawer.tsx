@@ -18,7 +18,7 @@ export default function CartDrawer() {
         onClick={close}
         aria-label="Close cart"
       />
-      <aside className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col">
+      <aside className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col rounded-l-lg">
         <header className="flex items-center justify-between px-6 py-5 border-b border-neutral-200">
           <h2 className="font-oswald text-lg font-bold uppercase tracking-widest">
             Cart ({count})
@@ -43,7 +43,7 @@ export default function CartDrawer() {
             <Link
               href="/products"
               onClick={close}
-              className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+              className="px-6 py-3 rounded-lg bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
             >
               Shop Now
             </Link>
@@ -53,7 +53,7 @@ export default function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               {items.map((item) => (
                 <div key={item.key} className="flex gap-4">
-                  <div className="w-20 h-24 bg-neutral-100 shrink-0 overflow-hidden">
+                  <div className="w-20 h-24 rounded-md bg-neutral-100 shrink-0 overflow-hidden">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.image}
@@ -128,7 +128,7 @@ export default function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={close}
-                  className="block w-full py-4 bg-black text-white text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+                  className="block w-full py-4 rounded-lg bg-black text-white text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
                 >
                   Checkout
                 </Link>
@@ -169,7 +169,7 @@ export default function CartDrawer() {
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full py-4 border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+                  className="block w-full py-4 rounded-lg border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
                 >
                   Order via Messenger
                 </a>

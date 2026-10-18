@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { MediaItem } from "@/lib/types";
+import { Alert, btnPrimary, btnSmall, btnSmallDanger, cardCls, PageHeader } from "../ui";
 
 export default function AdminMedia() {
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -80,48 +81,38 @@ export default function AdminMedia() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">Media</h1>
-          <p className="text-neutral-500 mt-2 text-sm">
-            Upload images and copy their URLs into products, content, or logo
-          </p>
-        </div>
-        <label className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors cursor-pointer">
-          {uploading ? "Uploading…" : "Upload Image"}
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            disabled={uploading}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) upload(file);
-              e.target.value = "";
-            }}
-          />
-        </label>
-      </div>
+      <PageHeader
+        title="Media"
+        subtitle="Upload images and copy their URLs into products, content, or logo"
+        action={
+          <label className={`${btnPrimary} cursor-pointer`}>
+            {uploading ? "Uploading…" : "Upload Image"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) upload(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        }
+      />
 
-      {message && (
-        <div className="mb-5 px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm">
-          {message}
-        </div>
-      )}
-      {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      {message && <Alert>{message}</Alert>}
+      {error && <Alert tone="error">{error}</Alert>}
 
-      <div className="mb-6 bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+      <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
         Uploads are stored in <code>.data/uploads</code> on the server. On serverless hosts
         these files reset on redeploy — for permanent images, drop files into{" "}
         <code>public/images</code> or paste an external URL.
       </div>
 
       {media.length === 0 ? (
-        <div className="py-16 bg-white border border-neutral-200 text-center">
+        <div className={`${cardCls} py-16 text-center`}>
           <p className="font-oswald text-2xl font-bold text-neutral-300 uppercase">
             No uploads yet
           </p>
@@ -132,8 +123,8 @@ export default function AdminMedia() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {media.map((item) => (
-            <div key={item.id} className="bg-white border border-neutral-200 p-4">
-              <div className="aspect-square bg-neutral-100 mb-3 overflow-hidden">
+            <div key={item.id} className={`${cardCls} p-4`}>
+              <div className="aspect-square bg-neutral-100 rounded-md mb-3 overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.url} alt={item.filename} className="w-full h-full object-cover" />
               </div>
@@ -145,14 +136,14 @@ export default function AdminMedia() {
                 <button
                   type="button"
                   onClick={() => copyUrl(item.url)}
-                  className="flex-1 px-3 py-2 text-[10px] border border-neutral-300 hover:bg-neutral-50 uppercase tracking-widest"
+                  className={`${btnSmall} flex-1`}
                 >
                   {copied === item.url ? "Copied" : "Copy URL"}
                 </button>
                 <button
                   type="button"
                   onClick={() => remove(item.id)}
-                  className="px-3 py-2 text-[10px] text-red-600 border border-red-200 hover:bg-red-50 uppercase tracking-widest"
+                  className={btnSmallDanger}
                 >
                   Delete
                 </button>

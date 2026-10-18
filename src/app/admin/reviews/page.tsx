@@ -2,6 +2,17 @@
 
 import { useEffect, useState } from "react";
 import type { Review } from "@/lib/types";
+import {
+  Alert,
+  btnPrimary,
+  btnSecondary,
+  btnSmall,
+  btnSmallDanger,
+  cardCls,
+  chipCls,
+  inputCls,
+  PageHeader,
+} from "../ui";
 
 export default function AdminReviews() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -86,37 +97,27 @@ export default function AdminReviews() {
 
   return (
     <div>
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-9">
-        <div>
-          <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">Reviews</h1>
-          <p className="text-neutral-500 mt-2 text-sm">
-            Manage the reviews shown on your homepage
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setEditing(empty);
-          }}
-          className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
-        >
-          + Add Review
-        </button>
-      </div>
+      <PageHeader
+        title="Reviews"
+        subtitle="Manage the reviews shown on your homepage"
+        action={
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(empty);
+            }}
+            className={btnPrimary}
+          >
+            + Add Review
+          </button>
+        }
+      />
 
-      {message && (
-        <div className="mb-5 px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm">
-          {message}
-        </div>
-      )}
-      {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      {message && <Alert>{message}</Alert>}
+      {error && <Alert tone="error">{error}</Alert>}
 
       {editing && (
-        <div className="bg-white border border-neutral-200 p-6 mb-6 space-y-4">
+        <div className={`${cardCls} p-6 mb-6 space-y-4`}>
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-bold tracking-[0.2em] uppercase mb-2">
@@ -182,11 +183,7 @@ export default function AdminReviews() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={() => save(editing)}
-              className="px-6 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800"
-            >
+            <button type="button" onClick={() => save(editing)} className={btnPrimary}>
               Save
             </button>
             <button
@@ -194,7 +191,7 @@ export default function AdminReviews() {
               onClick={() => {
                 setEditing(null);
               }}
-              className="px-6 py-3 border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50"
+              className={btnSecondary}
             >
               Cancel
             </button>
@@ -206,14 +203,14 @@ export default function AdminReviews() {
         {reviews.map((review) => (
           <div
             key={review.id}
-            className="bg-white border border-neutral-200 p-5 flex flex-wrap gap-4 items-start"
+            className={`${cardCls} p-5 flex flex-wrap gap-4 items-start`}
           >
             <div className="flex-1 min-w-[220px]">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-oswald text-lg font-bold uppercase">{review.name}</h3>
                 <span className="text-xs text-neutral-400">{review.source}</span>
                 <span
-                  className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${
+                  className={`${chipCls} ${
                     review.status === "published"
                       ? "bg-green-50 text-green-700 border-green-200"
                       : "bg-neutral-100 text-neutral-500 border-neutral-200"
@@ -234,14 +231,14 @@ export default function AdminReviews() {
                 onClick={() => {
                   setEditing(review);
                 }}
-                className="px-4 py-2 text-xs border border-neutral-300 hover:bg-neutral-50 tracking-widest uppercase"
+                className={btnSmall}
               >
                 Edit
               </button>
               <button
                 type="button"
                 onClick={() => remove(review.id)}
-                className="px-4 py-2 text-xs text-red-600 border border-red-200 hover:bg-red-50 tracking-widest uppercase"
+                className={btnSmallDanger}
               >
                 Delete
               </button>
@@ -249,7 +246,7 @@ export default function AdminReviews() {
           </div>
         ))}
         {reviews.length === 0 && (
-          <div className="py-16 bg-white border border-neutral-200 text-center">
+          <div className={`${cardCls} py-16 text-center`}>
             <p className="font-oswald text-2xl font-bold text-neutral-300 uppercase">
               No reviews yet
             </p>
@@ -259,6 +256,3 @@ export default function AdminReviews() {
     </div>
   );
 }
-
-const inputCls =
-  "w-full px-3.5 py-2.5 bg-white border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors";

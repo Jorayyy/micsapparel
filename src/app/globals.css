@@ -20,6 +20,18 @@ html {
   scroll-behavior: smooth;
 }
 
+@layer base {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    border-radius: 0.5rem;
+  }
+
+  button {
+    border-radius: 0.5rem;
+  }
+}
+
 @keyframes marquee {
   0% {
     transform: translateX(0);

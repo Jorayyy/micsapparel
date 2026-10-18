@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatDate, formatPeso } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
+import { Alert, btnSmall, cardCls, chipCls, inputCls, PageHeader } from "../ui";
 
 const STATUSES: OrderStatus[] = [
   "pending",
@@ -80,18 +81,12 @@ export default function AdminOrders() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">Orders</h1>
-        <p className="text-neutral-500 mt-2 text-sm">
-          Review incoming orders and update their status
-        </p>
-      </div>
+      <PageHeader
+        title="Orders"
+        subtitle="Review incoming orders and update their status"
+      />
 
-      {message && (
-        <div className="mb-5 px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm">
-          {message}
-        </div>
-      )}
+      {message && <Alert>{message}</Alert>}
 
       <div className="flex flex-wrap gap-2 mb-6">
         <FilterButton active={filter === "all"} onClick={() => setFilter("all")}>
@@ -111,7 +106,7 @@ export default function AdminOrders() {
       {loading ? (
         <p className="text-neutral-400 text-sm">Loading orders…</p>
       ) : filtered.length === 0 ? (
-        <div className="py-16 bg-white border border-neutral-200 text-center">
+        <div className={`${cardCls} py-16 text-center`}>
           <p className="font-oswald text-2xl font-bold text-neutral-300 uppercase">
             No orders {filter !== "all" ? `with status ${filter}` : "yet"}
           </p>
@@ -119,16 +114,14 @@ export default function AdminOrders() {
       ) : (
         <div className="space-y-3">
           {filtered.map((order) => (
-            <div key={order.id} className="bg-white border border-neutral-200">
+            <div key={order.id} className={cardCls}>
               <div className="p-5 flex flex-wrap items-center gap-4">
                 <div className="flex-1 min-w-[200px]">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-oswald text-lg font-bold tracking-wide">
                       {order.orderNumber}
                     </p>
-                    <span
-                      className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${STATUS_STYLES[order.status]}`}
-                    >
+                    <span className={`${chipCls} ${STATUS_STYLES[order.status]}`}>
                       {order.status}
                     </span>
                   </div>
@@ -148,7 +141,7 @@ export default function AdminOrders() {
                     value={order.status}
                     onChange={(e) => changeStatus(order.id, e.target.value as OrderStatus)}
                     aria-label={`Status for ${order.orderNumber}`}
-                    className="px-3 py-2 border border-neutral-300 text-xs bg-white focus:outline-none focus:border-black uppercase tracking-wider"
+                    className={`${inputCls} w-auto px-3 py-2 text-xs uppercase tracking-wider`}
                   >
                     {STATUSES.map((status) => (
                       <option key={status} value={status}>
@@ -159,7 +152,7 @@ export default function AdminOrders() {
                   <button
                     type="button"
                     onClick={() => setExpanded(expanded === order.id ? null : order.id)}
-                    className="px-4 py-2 text-xs border border-neutral-300 hover:bg-neutral-50 tracking-widest uppercase"
+                    className={btnSmall}
                   >
                     {expanded === order.id ? "Hide" : "Details"}
                   </button>
@@ -175,7 +168,7 @@ export default function AdminOrders() {
                     <ul className="space-y-3">
                       {order.items.map((item, index) => (
                         <li key={`${item.productId}-${index}`} className="flex gap-3 text-sm">
-                          <div className="w-12 h-14 bg-neutral-100 shrink-0 overflow-hidden">
+                          <div className="w-12 h-14 bg-neutral-100 rounded-md shrink-0 overflow-hidden">
                             {item.image && (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
@@ -279,8 +272,10 @@ function FilterButton({
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-2 text-[11px] font-bold tracking-[0.18em] uppercase transition-colors ${
-        active ? "bg-black text-white" : "bg-white border border-neutral-200 text-neutral-500 hover:text-black"
+      className={`px-4 py-2 rounded-lg text-[11px] font-bold tracking-[0.18em] uppercase transition-colors ${
+        active
+          ? "bg-black text-white"
+          : "bg-white border border-neutral-200 text-neutral-500 hover:text-black"
       }`}
     >
       {children}

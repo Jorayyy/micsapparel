@@ -17,7 +17,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
   return (
     <Link href={`/products/${product.slug}`} className="group block">
-      <div className="relative aspect-square bg-neutral-100 overflow-hidden">
+      <div className="relative aspect-square rounded-lg bg-neutral-100 overflow-hidden">
         <ProductImage
           src={image}
           alt={product.name}
@@ -26,7 +26,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         />
 
         {product.badge && (
-          <span className="absolute top-3 left-3 px-2 py-1 bg-white text-black text-[10px] font-bold tracking-widest uppercase">
+          <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-white text-black text-[10px] font-bold tracking-widest uppercase">
             {product.badge}
           </span>
         )}

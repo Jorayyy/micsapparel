@@ -21,13 +21,13 @@ export default function CartPage() {
         {!ready ? (
           <div className="py-24 text-center text-neutral-400 text-sm">Loading cart…</div>
         ) : items.length === 0 ? (
-          <div className="py-20 text-center border border-neutral-200">
+          <div className="py-20 text-center border border-neutral-200 rounded-lg">
             <p className="font-oswald text-3xl font-bold text-neutral-300 uppercase mb-5">
               Your cart is empty
             </p>
             <Link
               href="/products"
-              className="inline-flex px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+              className="inline-flex px-8 py-4 rounded-lg bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
             >
               Start Shopping
             </Link>
@@ -38,11 +38,11 @@ export default function CartPage() {
               {items.map((item) => (
                 <div
                   key={item.key}
-                  className="flex gap-5 p-4 border border-neutral-200 bg-white"
+                  className="flex gap-5 p-4 border border-neutral-200 rounded-lg bg-white"
                 >
                   <Link
                     href={`/products/${item.slug}`}
-                    className="w-24 h-28 bg-neutral-100 shrink-0 overflow-hidden"
+                    className="w-24 h-28 rounded-md bg-neutral-100 shrink-0 overflow-hidden"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -78,7 +78,7 @@ export default function CartPage() {
                       </button>
                     </div>
                     <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center border border-neutral-300">
+                      <div className="flex items-center border border-neutral-300 rounded-lg overflow-hidden">
                         <button
                           type="button"
                           onClick={() => setQty(item.key, item.qty - 1)}
@@ -106,7 +106,7 @@ export default function CartPage() {
               ))}
             </div>
 
-            <aside className="lg:sticky lg:top-28 h-fit border border-neutral-200 p-6 space-y-5">
+            <aside className="lg:sticky lg:top-28 h-fit border border-neutral-200 rounded-lg p-6 space-y-5">
               <h2 className="font-oswald text-lg font-bold uppercase tracking-widest">
                 Order Summary
               </h2>
@@ -126,7 +126,7 @@ export default function CartPage() {
               <div className="grid gap-2">
                 <Link
                   href="/checkout"
-                  className="block w-full py-4 bg-black text-white text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+                  className="block w-full py-4 rounded-lg bg-black text-white text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
                 >
                   Proceed to Checkout
                 </Link>
@@ -167,7 +167,7 @@ export default function CartPage() {
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full py-4 border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+                  className="block w-full py-4 rounded-lg border border-neutral-300 text-center font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
                 >
                   Order via Messenger
                 </a>

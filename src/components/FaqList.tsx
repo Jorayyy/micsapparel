@@ -69,13 +69,13 @@ export default function FaqList({
             href={messengerUrl(messenger, "Hi MicsApparel! I have a question.")}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-8 py-4 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
+            className="px-8 py-4 rounded-lg bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors"
           >
             Message Us
           </a>
           <Link
             href="/contact"
-            className="px-8 py-4 border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
+            className="px-8 py-4 rounded-lg border border-neutral-300 font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-50 transition-colors"
           >
             Contact Page
           </Link>

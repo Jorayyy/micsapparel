@@ -148,10 +148,10 @@ export default function AdminProducts() {
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4 mb-9">
         <div>
-          <h1 className="font-oswald text-4xl font-bold uppercase tracking-tight">
+          <h1 className="font-oswald text-3xl font-bold uppercase tracking-tight">
             Products
           </h1>
-          <p className="text-neutral-500 mt-2 text-sm">Manage your product catalog</p>
+          <p className="text-neutral-500 mt-1.5 text-sm">Manage your product catalog</p>
         </div>
         <button
           type="button"
@@ -166,12 +166,12 @@ export default function AdminProducts() {
       </div>
 
       {message && (
-        <div className="mb-5 px-4 py-3 bg-neutral-50 border border-neutral-200 text-sm">
+        <div className="mb-5 px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-lg text-sm">
           {message}
         </div>
       )}
       {error && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm">
+        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
           {error}
         </div>
       )}
@@ -192,9 +192,9 @@ export default function AdminProducts() {
       ) : (
         <div className="space-y-3">
           {products.map((product) => (
-            <div key={product.id} className="bg-white border border-neutral-200 p-5">
+            <div key={product.id} className="bg-white border border-neutral-200 rounded-lg p-5">
               <div className="flex flex-wrap items-center gap-5">
-                <div className="w-16 h-16 bg-neutral-100 shrink-0 overflow-hidden">
+                <div className="w-16 h-16 bg-neutral-100 rounded-md shrink-0 overflow-hidden">
                   {product.images[0] && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -243,7 +243,7 @@ export default function AdminProducts() {
           ))}
 
           {products.length === 0 && (
-            <div className="py-16 bg-white border border-neutral-200 text-center">
+            <div className="py-16 bg-white border border-neutral-200 rounded-lg text-center">
               <p className="font-oswald text-2xl font-bold text-neutral-300 uppercase">
                 No products yet
               </p>
@@ -263,7 +263,7 @@ function StatusPill({ status }: { status: ProductStatus }) {
   };
   return (
     <span
-      className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${styles[status]}`}
+      className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${styles[status]}`}
     >
       {status}
     </span>
@@ -272,7 +272,7 @@ function StatusPill({ status }: { status: ProductStatus }) {
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-black text-white">
+    <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-black text-white">
       {children}
     </span>
   );
@@ -341,7 +341,7 @@ function ProductEditor({
   }
 
   return (
-    <div className="bg-white border border-neutral-200 p-6 space-y-6">
+    <div className="bg-white border border-neutral-200 rounded-lg p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="font-oswald text-xl font-bold uppercase tracking-wide">
           {isNew ? "New Product" : `Edit: ${product.name}`}
@@ -488,7 +488,7 @@ function ProductEditor({
           {form.features.map((feature, index) => (
             <span
               key={`${feature}-${index}`}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-neutral-100 text-xs"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-neutral-100 text-xs"
             >
               {feature}
               <button
@@ -544,7 +544,7 @@ function ProductEditor({
         </label>
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-3">
           {form.images.map((image, index) => (
-            <div key={`${image}-${index}`} className="relative group aspect-square bg-neutral-100">
+            <div key={`${image}-${index}`} className="relative group aspect-square rounded-md bg-neutral-100 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image} alt="" className="w-full h-full object-cover" />
               <button
@@ -555,7 +555,7 @@ function ProductEditor({
                     form.images.filter((_, i) => i !== index)
                   )
                 }
-                className="absolute top-1 right-1 w-5 h-5 bg-black text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 w-5 h-5 rounded-md bg-black text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Remove image"
               >
                 ×
@@ -706,7 +706,7 @@ function ProductEditor({
 }
 
 const inputCls =
-  "w-full px-3.5 py-2.5 bg-white border border-neutral-300 text-sm focus:outline-none focus:border-black transition-colors";
+  "w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-lg text-sm focus:outline-none focus:border-black focus:ring-2 focus:ring-black/5 transition-colors";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
