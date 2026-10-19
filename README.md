@@ -1,55 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Database (Neon Postgres)
+# Mics Apparel
 
-All store data (products, categories, reviews, FAQs, orders, media uploads, business
-content) lives in Postgres and is the source of truth. The old `.data/store.json`
-file store is legacy only.
+**Premium streetwear from Tacloban City.**
 
-1. Copy `.env.example` to `.env.local` and set `DATABASE_URL` to your Neon connection
-   string (also set it in Vercel project settings for production).
-2. First request auto-creates tables and seeds catalog content from `src/data/business.ts`.
-3. To import existing local data (`.data/store.json` + `.data/uploads`):
+[**Shop the drop**](https://micsapparel.vercel.app) · [Collections](https://micsapparel.vercel.app/collections) · [Contact](https://micsapparel.vercel.app/contact)
+
+[![Mics Apparel storefront](screenshots/preview.png)](https://micsapparel.vercel.app)
+
+<sub>Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 · PostgreSQL (Neon)</sub>
+</div>
+
+Mics Apparel is a mobile-first storefront and order desk for a Tacloban streetwear label.
+Shoppers browse the current drop, build a cart, and check out with GCash, Maya, bank
+transfer, or cash on delivery. Everything the shop sells — products, categories, photos,
+reviews, homepage copy, and incoming orders — is managed from a password-protected admin
+studio, so the store can be restocked without a deploy.
+
+## Storefront
+
+- **Shop by category** — Caps, Hats, Accessories, Tees and Shorts with instant filtering,
+  per-product photo galleries, sizes and stock status.
+- **Cart & checkout** — a persistent cart drawer, then a one-page checkout that captures
+  delivery details and the preferred payment method (GCash, Maya, bank transfer, or COD
+  for select areas).
+- **Orders** — every checkout is written to Postgres with its line items, quantities and
+  totals, and the customer lands on a branded success page with an order number.
+- **Reviews, FAQ and story** — customer photos and quotes, sizing and shipping answers,
+  and an about page for the brand.
+- **Messenger, everywhere** — a one-tap chat entry point for questions and manual orders.
+
+## Admin studio (`/admin`)
+
+| Area | What it does |
+| --- | --- |
+| Products | Create, edit, feature and archive items; bulk product import |
+| Categories | Rename and reorder the collections shown on the storefront |
+| Orders | Review incoming orders, payment method and fulfilment status |
+| Reviews | Approve and curate customer reviews |
+| Content | Edit homepage copy, hero and announcement text |
+| Media | Upload once, reuse product imagery across the catalog |
+| Logo | Swap the storefront mark without touching code |
+
+Admin sessions are signed, HTTP-only cookies; the password comes from
+`ADMIN_PASSWORD` (see `.env.example`).
+
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router, route handlers) |
+| UI | React 19, TypeScript, Tailwind CSS 4 |
+| Data | PostgreSQL (Neon) via `pg`, JSONB documents, schema auto-created on first connection |
+| Media | Uploads stored server-side and served through `/api/media/[id]` |
+| SEO | Metadata, Open Graph, sitemap and robots routes |
+
+## Getting started
 
 ```bash
-npm run migrate:neon
-```
-
-Image URL rules: product image fields accept local paths (`/images/...`) or any
-direct `http(s)` image URL. Facebook/Instagram **post or page** links are not
-images and are rejected — use Upload for those photos.
-
-## Getting Started
-
-First, run the development server:
-
-```bash
+git clone https://github.com/Jorayyy/micsapparel.git
+cd micsapparel
+npm install
+cp .env.example .env.local   # set DATABASE_URL and ADMIN_PASSWORD
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. The storefront falls back to the seed catalog in `src/data`
+until the database has products; visit `/admin` to add real ones.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Importing an older file-backed dataset? `npm run migrate:neon` copies it into Postgres.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project layout
 
-## Learn More
+```
+src/
+  app/            storefront routes, /admin studio, /api handlers
+  components/     cart drawer, product cards, shop browser, messenger, chrome
+  data/           seed business info and catalog
+  lib/            database + store, admin auth, cart context, formatting, SEO
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Import the repo on Vercel and set `DATABASE_URL`, `ADMIN_PASSWORD`,
+`ADMIN_SESSION_SECRET`, and `NEXT_PUBLIC_SITE_URL`. There is no separate migration step:
+tables are created on first connection, so a fresh database is ready after the first
+request.
