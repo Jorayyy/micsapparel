@@ -588,7 +588,7 @@ export default function AdminProducts() {
             className="fixed inset-0 z-40 bg-black/40"
             onClick={() => setShowBulkEdit(false)}
           />
-          <aside className="fixed top-0 right-0 z-50 h-full w-full max-w-xl bg-neutral-50 shadow-2xl overflow-y-auto">
+          <aside className="fixed top-0 right-0 z-50 h-full w-full max-w-2xl bg-neutral-50 shadow-2xl overflow-y-auto">
             <div className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-white border-b border-neutral-200 px-5 py-4">
               <div>
                 <h2 className="font-oswald text-lg font-bold uppercase">Bulk edit</h2>
@@ -1242,22 +1242,25 @@ function BulkEdit({
   }
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-lg p-4 space-y-4">
-      <div className="border border-neutral-200 rounded-lg p-3">
-        <div className="grid sm:grid-cols-3 gap-3">
+    <div className="space-y-4">
+      <BulkSection
+        title="Scope"
+        description="Who this change applies to."
+      >
+        <div className="grid sm:grid-cols-2 gap-3">
           <Field label="Apply to">
             <select
               value={scope}
               onChange={(e) => setScope(e.target.value as "selected" | "matching")}
               className={inputCls}
             >
-              <option value="selected">Selected ({ids.length})</option>
+              <option value="selected">Selected products ({ids.length})</option>
               <option value="matching">All matching filters</option>
             </select>
           </Field>
           {scope === "matching" && (
             <>
-              <Field label="Filter: category">
+              <Field label="Category filter">
                 <select
                   value={scopeCategory}
                   onChange={(e) => setScopeCategory(e.target.value)}
@@ -1271,7 +1274,7 @@ function BulkEdit({
                   ))}
                 </select>
               </Field>
-              <Field label="Filter: current status">
+              <Field label="Status filter">
                 <select
                   value={scopeStatus}
                   onChange={(e) => setScopeStatus(e.target.value as "" | ProductStatus)}
@@ -1286,161 +1289,200 @@ function BulkEdit({
             </>
           )}
         </div>
-        {scope === "matching" && (
-          <p className="text-xs text-neutral-500 mt-2">
-            {targetIds.length} product{targetIds.length === 1 ? "" : "s"} match.
-          </p>
-        )}
+        <p className="mt-3 text-xs text-neutral-500">
+          <span className="font-bold text-black">{targetIds.length}</span>{" "}
+          product{targetIds.length === 1 ? "" : "s"} will be updated.
+        </p>
+      </BulkSection>
+
+      <BulkSection title="Pricing">
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field label="Price change">
+            <select
+              value={priceAction}
+              onChange={(e) => setPriceAction(e.target.value as BulkPriceAction)}
+              className={inputCls}
+            >
+              <option value="none">No change</option>
+              <option value="set">Set exact price (₱)</option>
+              <option value="increase">Increase by %</option>
+              <option value="decrease">Decrease by %</option>
+              <option value="add">Add amount (₱)</option>
+              <option value="subtract">Subtract amount (₱)</option>
+            </select>
+          </Field>
+          <Field label={priceAction === "set" ? "Price (₱)" : "Value"}>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={priceValue}
+              onChange={(e) => setPriceValue(e.target.value)}
+              disabled={priceAction === "none"}
+              placeholder={priceAction === "none" ? "—" : "0"}
+              className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
+            />
+          </Field>
+          <Field label="Compare-at price">
+            <select
+              value={compareAction}
+              onChange={(e) =>
+                setCompareAction(e.target.value as "none" | "set" | "clear")
+              }
+              className={inputCls}
+            >
+              <option value="none">No change</option>
+              <option value="set">Set price</option>
+              <option value="clear">Clear price</option>
+            </select>
+          </Field>
+          <Field label="Compare-at value (₱)">
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={compareValue}
+              onChange={(e) => setCompareValue(e.target.value)}
+              disabled={compareAction !== "set"}
+              placeholder={compareAction === "set" ? "0" : "—"}
+              className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
+            />
+          </Field>
+        </div>
+      </BulkSection>
+
+      <BulkSection title="Details">
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field label="Status">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as "" | ProductStatus)}
+              className={inputCls}
+            >
+              <option value="">No change</option>
+              <option value="active">Active</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+          </Field>
+          <Field label="Category">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className={inputCls}
+            >
+              <option value="">No change</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Featured">
+            <select
+              value={featured}
+              onChange={(e) => setFeatured(e.target.value as BulkTriState)}
+              className={inputCls}
+            >
+              <option value="">No change</option>
+              <option value="on">On</option>
+              <option value="off">Off</option>
+            </select>
+          </Field>
+          <Field label="New arrival">
+            <select
+              value={isNew}
+              onChange={(e) => setIsNew(e.target.value as BulkTriState)}
+              className={inputCls}
+            >
+              <option value="">No change</option>
+              <option value="on">On</option>
+              <option value="off">Off</option>
+            </select>
+          </Field>
+          <Field label="Badge">
+            <select
+              value={badgeAction}
+              onChange={(e) => setBadgeAction(e.target.value as "none" | "clear")}
+              className={inputCls}
+            >
+              <option value="none">No change</option>
+              <option value="clear">Clear badge</option>
+            </select>
+          </Field>
+        </div>
+      </BulkSection>
+
+      <BulkSection title="Inventory">
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field label="Stock">
+            <select
+              value={stockAction}
+              onChange={(e) =>
+                setStockAction(e.target.value as "none" | "set" | "clear")
+              }
+              className={inputCls}
+            >
+              <option value="none">No change</option>
+              <option value="set">Set exact stock</option>
+              <option value="clear">Clear tracking</option>
+            </select>
+          </Field>
+          <Field label="Stock value">
+            <input
+              type="number"
+              min={0}
+              step={1}
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              disabled={stockAction !== "set"}
+              placeholder={stockAction === "set" ? "0" : "—"}
+              className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
+            />
+          </Field>
+        </div>
+      </BulkSection>
+
+      {error && (
+        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          {error}
+        </p>
+      )}
+
+      <div className="sticky bottom-0 -mx-5 px-5 py-4 bg-neutral-50 border-t border-neutral-200">
+        <button
+          type="button"
+          onClick={apply}
+          disabled={busy || targetIds.length === 0}
+          className="w-full px-7 py-3.5 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
+        >
+          {busy ? "Applying…" : `Apply to ${targetIds.length} product${targetIds.length === 1 ? "" : "s"}`}
+        </button>
       </div>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Field label="Price change">
-          <select
-            value={priceAction}
-            onChange={(e) => setPriceAction(e.target.value as BulkPriceAction)}
-            className={inputCls}
-          >
-            <option value="none">No change</option>
-            <option value="set">Set exact price (₱)</option>
-            <option value="increase">Increase by %</option>
-            <option value="decrease">Decrease by %</option>
-            <option value="add">Add amount (₱)</option>
-            <option value="subtract">Subtract amount (₱)</option>
-          </select>
-        </Field>
-        <Field label="Price value">
-          <input
-            type="number"
-            min={0}
-            step="0.01"
-            value={priceValue}
-            onChange={(e) => setPriceValue(e.target.value)}
-            disabled={priceAction === "none"}
-            placeholder={priceAction === "none" ? "—" : "0"}
-            className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
-          />
-        </Field>
-        <Field label="Compare-at price">
-          <select
-            value={compareAction}
-            onChange={(e) =>
-              setCompareAction(e.target.value as "none" | "set" | "clear")
-            }
-            className={inputCls}
-          >
-            <option value="none">No change</option>
-            <option value="set">Set price</option>
-            <option value="clear">Clear price</option>
-          </select>
-        </Field>
-        <Field label="Compare-at value (₱)">
-          <input
-            type="number"
-            min={0}
-            step="0.01"
-            value={compareValue}
-            onChange={(e) => setCompareValue(e.target.value)}
-            disabled={compareAction !== "set"}
-            placeholder={compareAction === "set" ? "0" : "—"}
-            className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
-          />
-        </Field>
-        <Field label="Status">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as "" | ProductStatus)}
-            className={inputCls}
-          >
-            <option value="">No change</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
-          </select>
-        </Field>
-        <Field label="Category">
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className={inputCls}
-          >
-            <option value="">No change</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Featured">
-          <select
-            value={featured}
-            onChange={(e) => setFeatured(e.target.value as BulkTriState)}
-            className={inputCls}
-          >
-            <option value="">No change</option>
-            <option value="on">On</option>
-            <option value="off">Off</option>
-          </select>
-        </Field>
-        <Field label="New arrival">
-          <select
-            value={isNew}
-            onChange={(e) => setIsNew(e.target.value as BulkTriState)}
-            className={inputCls}
-          >
-            <option value="">No change</option>
-            <option value="on">On</option>
-            <option value="off">Off</option>
-          </select>
-        </Field>
-        <Field label="Stock">
-          <select
-            value={stockAction}
-            onChange={(e) =>
-              setStockAction(e.target.value as "none" | "set" | "clear")
-            }
-            className={inputCls}
-          >
-            <option value="none">No change</option>
-            <option value="set">Set exact stock</option>
-            <option value="clear">Clear tracking</option>
-          </select>
-        </Field>
-        <Field label="Stock value">
-          <input
-            type="number"
-            min={0}
-            step={1}
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            disabled={stockAction !== "set"}
-            placeholder={stockAction === "set" ? "0" : "—"}
-            className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
-          />
-        </Field>
-        <Field label="Badge">
-          <select
-            value={badgeAction}
-            onChange={(e) => setBadgeAction(e.target.value as "none" | "clear")}
-            className={inputCls}
-          >
-            <option value="none">No change</option>
-            <option value="clear">Clear badge</option>
-          </select>
-        </Field>
-      </div>
-
-      {error && <p className="text-xs text-red-600">{error}</p>}
-
-      <button
-        type="button"
-        onClick={apply}
-        disabled={busy || targetIds.length === 0}
-        className="px-7 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
-      >
-        {busy ? "Applying…" : `Apply to ${targetIds.length}`}
-      </button>
     </div>
+  );
+}
+
+function BulkSection({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-lg border border-neutral-200 bg-white p-4">
+      <div className="mb-3">
+        <h3 className="text-[11px] font-bold tracking-[0.2em] uppercase text-neutral-500">
+          {title}
+        </h3>
+        {description && <p className="text-xs text-neutral-400 mt-1">{description}</p>}
+      </div>
+      {children}
+    </section>
   );
 }
 
