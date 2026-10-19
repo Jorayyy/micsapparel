@@ -733,6 +733,15 @@ export async function createOrder(draft: OrderDraft): Promise<CreateOrderResult>
   return result;
 }
 
+export async function deleteOrder(id: string): Promise<boolean> {
+  await ensureReady();
+  const rows = await query<{ id: string }>("DELETE FROM orders WHERE id = $1 RETURNING id", [
+    id,
+  ]);
+  if (rows.length > 0) await touchLastUpdated();
+  return rows.length > 0;
+}
+
 export async function updateOrderStatus(
   id: string,
   status: OrderStatus,

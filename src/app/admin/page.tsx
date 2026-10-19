@@ -1,9 +1,17 @@
 import Link from "next/link";
 import { getOrders, getProducts, getCategories, getReviews, getMedia } from "@/lib/store";
 import { formatPeso } from "@/lib/format";
-import { cardCls, PageHeader } from "./ui";
+import { cardCls, chipCls, PageHeader } from "./ui";
 
 export const dynamic = "force-dynamic";
+
+const STATUS_CHIP: Record<string, string> = {
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  confirmed: "bg-blue-50 text-blue-700 border-blue-200",
+  shipped: "bg-indigo-50 text-indigo-700 border-indigo-200",
+  delivered: "bg-green-50 text-green-700 border-green-200",
+  cancelled: "bg-red-50 text-red-700 border-red-200",
+};
 
 const cards = [
   { href: "/admin/orders", label: "Orders", desc: "Process and update order status" },
@@ -69,7 +77,43 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 grid lg:grid-cols-2 gap-4">
+        <div className={`${cardCls} p-6`}>
+          <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-4">
+            Recent Orders
+          </h3>
+          {orders.length === 0 ? (
+            <p className="text-neutral-400 text-sm">No orders yet.</p>
+          ) : (
+            <ul className="space-y-3">
+              {orders.slice(0, 5).map((order) => (
+                <li key={order.id} className="flex items-center justify-between gap-3 text-sm">
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{order.orderNumber}</p>
+                    <p className="text-xs text-neutral-400 truncate">
+                      {order.customer.name}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-medium">{formatPeso(order.total)}</p>
+                    <span className={`${chipCls} ${STATUS_CHIP[order.status] ?? ""} mt-1`}>
+                      {order.status}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          {orders.length > 0 && (
+            <Link
+              href="/admin/orders"
+              className="inline-block mt-4 text-xs tracking-widest uppercase text-neutral-500 hover:text-black transition-colors"
+            >
+              View all orders →
+            </Link>
+          )}
+        </div>
+
         <div className={`${cardCls} p-6`}>
           <h3 className="font-oswald text-xs font-bold text-neutral-400 tracking-[0.2em] uppercase mb-4">
             Store Health

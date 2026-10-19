@@ -3,7 +3,15 @@
 import { useEffect, useState } from "react";
 import { formatDate, formatPeso } from "@/lib/format";
 import type { Order, OrderStatus } from "@/lib/types";
-import { Alert, btnSmall, cardCls, chipCls, inputCls, PageHeader } from "../ui";
+import {
+  Alert,
+  btnSmall,
+  btnSmallDanger,
+  cardCls,
+  chipCls,
+  inputCls,
+  PageHeader,
+} from "../ui";
 
 const STATUSES: OrderStatus[] = [
   "pending",
@@ -67,6 +75,36 @@ export default function AdminOrders() {
       }
     } catch {
       setMessage("Failed to update order.");
+      setTimeout(() => setMessage(""), 3000);
+    }
+  }
+
+  async function removeOrder(order: Order) {
+    if (
+      !confirm(
+        `Delete ${order.orderNumber}? This cannot be undone. Stock is not restored.`
+      )
+    ) {
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: order.id }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setMessage(data?.error || "Failed to delete order.");
+        setTimeout(() => setMessage(""), 3000);
+        return;
+      }
+      setExpanded(null);
+      setMessage("Order deleted.");
+      setTimeout(() => setMessage(""), 3000);
+      load();
+    } catch {
+      setMessage("Failed to delete order.");
       setTimeout(() => setMessage(""), 3000);
     }
   }
@@ -155,6 +193,14 @@ export default function AdminOrders() {
                     className={btnSmall}
                   >
                     {expanded === order.id ? "Hide" : "Details"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeOrder(order)}
+                    className={btnSmallDanger}
+                    aria-label={`Delete ${order.orderNumber}`}
+                  >
+                    Delete
                   </button>
                 </div>
               </div>

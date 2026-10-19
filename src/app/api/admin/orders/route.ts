@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated, isSameOrigin } from "@/lib/admin-auth";
-import { getOrderById, getOrders, updateOrderStatus } from "@/lib/store";
+import { deleteOrder, getOrderById, getOrders, updateOrderStatus } from "@/lib/store";
 import type { OrderStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +41,28 @@ export async function PUT(request: NextRequest) {
     const order = await updateOrderStatus(body.id, body.status, body.note);
     if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
     return NextResponse.json({ order });
+  } catch {
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+  }
+  try {
+    const body = (await request.json()) as { id?: string };
+    if (!body?.id) {
+      return NextResponse.json({ error: "Order id required" }, { status: 400 });
+    }
+    const removed = await deleteOrder(body.id);
+    if (!removed) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
