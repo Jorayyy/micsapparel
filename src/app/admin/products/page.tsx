@@ -37,25 +37,55 @@ export default function AdminProducts() {
   const [marked, setMarked] = useState<string[]>([]);
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [showBulk, setShowBulk] = useState(false);
-  const [selectCategory, setSelectCategory] = useState("");
+  const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"" | ProductStatus>("");
+  const [sort, setSort] = useState<
+    "newest" | "name" | "price-asc" | "price-desc" | "stock-asc"
+  >("newest");
   const markedIds = marked.filter((id) => products.some((p) => p.id === id));
-  const categoryMatchCount = products.filter((p) => p.category === selectCategory).length;
 
-  function selectAll() {
-    if (products.length === 0) return;
+  const filtered = products
+    .filter((p) => {
+      const q = search.trim().toLowerCase();
+      if (
+        q &&
+        !`${p.name} ${p.slug} ${p.sku ?? ""}`.toLowerCase().includes(q)
+      ) {
+        return false;
+      }
+      if (filterCategory && p.category !== filterCategory) return false;
+      if (filterStatus && p.status !== filterStatus) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      switch (sort) {
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "price-asc":
+          return a.price - b.price;
+        case "price-desc":
+          return b.price - a.price;
+        case "stock-asc":
+          return (a.stock ?? Infinity) - (b.stock ?? Infinity);
+        default:
+          return b.createdAt.localeCompare(a.createdAt);
+      }
+    });
+
+  const filteredIds = filtered.map((p) => p.id);
+  const allFilteredSelected =
+    filteredIds.length > 0 && filteredIds.every((id) => marked.includes(id));
+
+  function selectAllFiltered() {
+    if (filteredIds.length === 0) return;
     if (
-      products.length > 10 &&
-      !confirm(`Select all ${products.length} products?`)
+      filteredIds.length > 10 &&
+      !confirm(`Select all ${filteredIds.length} products in this view?`)
     ) {
       return;
     }
-    setMarked(products.map((p) => p.id));
-  }
-
-  function selectCategoryProducts() {
-    setMarked(
-      products.filter((p) => p.category === selectCategory).map((p) => p.id)
-    );
+    setMarked(filteredIds);
   }
 
   async function load() {
@@ -218,7 +248,9 @@ export default function AdminProducts() {
           <h1 className="font-oswald text-3xl font-bold uppercase tracking-tight">
             Products
           </h1>
-          <p className="text-neutral-500 mt-1.5 text-sm">Manage your product catalog</p>
+          <p className="text-neutral-500 mt-1.5 text-sm">
+            Manage your product catalog · {products.length} products
+          </p>
         </div>
         <button
           type="button"
@@ -244,49 +276,75 @@ export default function AdminProducts() {
       )}
 
       {!editing && (
-        <div className="mb-6 flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowBulk((v) => !v)}
-            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors"
-          >
-            {showBulk ? "Close Bulk Photos" : "Bulk Photos"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowBulkEdit((v) => !v)}
-            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors"
-          >
-            {showBulkEdit ? "Close Bulk Edit" : "Bulk Edit"}
-          </button>
-          <button
-            type="button"
-            onClick={selectAll}
-            disabled={products.length === 0}
-            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors disabled:opacity-50"
-          >
-            Select all ({products.length})
-          </button>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, slug or SKU"
+            className={`${inputCls} w-auto min-w-[220px] flex-1 max-w-sm`}
+          />
           <select
-            value={selectCategory}
-            onChange={(e) => setSelectCategory(e.target.value)}
-            className={`${inputCls} w-auto min-w-[180px] py-2.5`}
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className={`${inputCls} w-auto min-w-[150px]`}
           >
-            <option value="">Select category…</option>
+            <option value="">All categories</option>
             {categories.map((c) => (
               <option key={c.id} value={c.slug}>
                 {c.name}
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            onClick={selectCategoryProducts}
-            disabled={!selectCategory}
-            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors disabled:opacity-50"
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as "" | ProductStatus)}
+            className={`${inputCls} w-auto min-w-[130px]`}
           >
-            Select category ({categoryMatchCount})
-          </button>
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as typeof sort)}
+            className={`${inputCls} w-auto min-w-[130px]`}
+          >
+            <option value="newest">Newest</option>
+            <option value="name">Name A–Z</option>
+            <option value="price-asc">Price ↑</option>
+            <option value="price-desc">Price ↓</option>
+            <option value="stock-asc">Stock ↑</option>
+          </select>
+          {(search || filterCategory || filterStatus) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setFilterCategory("");
+                setFilterStatus("");
+              }}
+              className="px-4 py-2.5 text-xs underline text-neutral-500 hover:text-black"
+            >
+              Reset
+            </button>
+          )}
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowBulk((v) => !v)}
+              className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors"
+            >
+              {showBulk ? "Close Bulk Photos" : "Bulk Photos"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowBulkEdit(true)}
+              className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors"
+            >
+              Bulk Edit
+            </button>
+          </div>
         </div>
       )}
 
@@ -298,28 +356,6 @@ export default function AdminProducts() {
             load();
           }}
         />
-      )}
-
-      {!editing && !loading && showBulkEdit && (
-        <div className="mb-6">
-          <BulkEdit
-            products={products}
-            ids={markedIds}
-            categories={categories}
-            onDone={(updated, failed) => {
-              setShowBulkEdit(false);
-              flash(
-                updated > 0
-                  ? `Updated ${updated} product${updated === 1 ? "" : "s"}${
-                      failed ? `, ${failed} failed` : ""
-                    }.`
-                  : "No products updated.",
-                updated === 0 || failed > 0
-              );
-              load();
-            }}
-          />
-        </div>
       )}
 
       {editing ? (
@@ -338,117 +374,268 @@ export default function AdminProducts() {
       ) : (
         <div className="space-y-3">
           {markedIds.length > 0 && (
-            <div className="px-4 py-3 rounded-lg bg-neutral-100 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-sm text-neutral-600">
-                  {markedIds.length} selected
-                </span>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowBulkEdit((v) => !v)}
-                    className="px-4 py-2 text-xs rounded-lg bg-black text-white hover:bg-neutral-800 transition-all tracking-widest uppercase"
-                  >
-                    {showBulkEdit ? "Close bulk edit" : "Bulk edit"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMarked([])}
-                    className="px-4 py-2 text-xs border border-neutral-300 rounded-lg hover:bg-white transition-all tracking-widest uppercase"
-                  >
-                    Clear
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteMarked}
-                    className="px-4 py-2 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all tracking-widest uppercase"
-                  >
-                    Delete selected ({markedIds.length})
-                  </button>
-                </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-lg bg-black text-white">
+              <span className="text-sm">{markedIds.length} selected</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkEdit(true)}
+                  className="px-4 py-2 text-xs rounded-md bg-white text-black hover:bg-neutral-200 transition-all tracking-widest uppercase"
+                >
+                  Bulk edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMarked([])}
+                  className="px-4 py-2 text-xs rounded-md border border-neutral-600 hover:bg-neutral-800 transition-all tracking-widest uppercase"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteMarked}
+                  className="px-4 py-2 text-xs rounded-md bg-red-600 hover:bg-red-700 transition-all tracking-widest uppercase"
+                >
+                  Delete selected
+                </button>
               </div>
             </div>
           )}
-          {products.map((product) => (
-            <div key={product.id} className="bg-white border border-neutral-200 rounded-lg p-5">
-              <div className="flex flex-wrap items-center gap-5">
-                <input
-                  type="checkbox"
-                  checked={marked.includes(product.id)}
-                  onChange={() => toggleMark(product.id)}
-                  aria-label={`Select ${product.name}`}
-                  className="w-4 h-4 accent-black shrink-0"
-                />
-                <div className="w-16 h-16 bg-neutral-100 rounded-md shrink-0 overflow-hidden">
-                  {product.images[0] && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={product.images[0]}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="flex-1 min-w-[160px]">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-oswald text-lg font-bold uppercase">
-                      {product.name}
-                    </h3>
-                    <StatusPill status={product.status} />
-                    {product.featured && <Tag>Featured</Tag>}
-                    {product.isNew && <Tag>New</Tag>}
-                  </div>
-                  <p className="text-neutral-500 text-sm mt-1">
-                    ₱{product.price} · {product.category} ·{" "}
-                    {product.stock === null ? "Stock not tracked" : `${product.stock} in stock`}
-                  </p>
-                  <p className="text-neutral-400 text-xs mt-0.5">/{product.slug}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => toggleFeatured(product)}
-                    className={`px-4 py-2 text-xs border transition-all tracking-widest uppercase ${
-                      product.featured
-                        ? "border-black bg-black text-white hover:bg-neutral-800"
-                        : "border-neutral-300 hover:bg-neutral-50"
-                    }`}
-                  >
-                    {product.featured ? "Featured" : "Mark"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditing(product);
-                      setIsNew(false);
-                    }}
-                    className="px-4 py-2 text-xs border border-neutral-300 hover:bg-neutral-50 transition-all tracking-widest uppercase"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(product.id)}
-                    className="px-4 py-2 text-xs text-red-600 border border-red-200 hover:bg-red-50 transition-all tracking-widest uppercase"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
 
-          {products.length === 0 && (
-            <div className="py-16 bg-white border border-neutral-200 rounded-lg text-center">
-              <p className="font-oswald text-2xl font-bold text-neutral-300 uppercase">
-                No products yet
-              </p>
+          <div className="bg-white border border-neutral-200 rounded-lg">
+            <div className="overflow-x-auto lg:overflow-visible">
+              <table className="w-full text-sm">
+                <thead className="bg-neutral-50 text-neutral-500 text-[10px] uppercase tracking-[0.15em]">
+                  <tr className="border-b border-neutral-200 text-left">
+                    <th className="px-4 py-3 w-10">
+                      <input
+                        type="checkbox"
+                        checked={allFilteredSelected}
+                        ref={(el) => {
+                          if (el) {
+                            el.indeterminate =
+                              !allFilteredSelected &&
+                              filteredIds.some((id) => marked.includes(id));
+                          }
+                        }}
+                        onChange={() =>
+                          allFilteredSelected
+                            ? setMarked((m) =>
+                                m.filter((id) => !filteredIds.includes(id))
+                              )
+                            : selectAllFiltered()
+                        }
+                        aria-label="Select all products in view"
+                        className="w-4 h-4 accent-black"
+                      />
+                    </th>
+                    <th className="px-3 py-3 font-bold">Product</th>
+                    <th className="px-3 py-3 font-bold">Status</th>
+                    <th className="px-3 py-3 font-bold">Price</th>
+                    <th className="px-3 py-3 font-bold">Stock</th>
+                    <th className="px-3 py-3 font-bold">Category</th>
+                    <th className="px-3 py-3 font-bold">Updated</th>
+                    <th className="px-4 py-3 w-10">
+                      <span className="sr-only">Actions</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {filtered.map((product) => (
+                    <tr key={product.id} className="hover:bg-neutral-50">
+                      <td className="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={marked.includes(product.id)}
+                          onChange={() => toggleMark(product.id)}
+                          aria-label={`Select ${product.name}`}
+                          className="w-4 h-4 accent-black"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-neutral-100 rounded-md shrink-0 overflow-hidden">
+                            {product.images[0] && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={product.images[0]}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <p className="font-oswald font-bold uppercase leading-tight truncate">
+                                {product.name}
+                              </p>
+                              {product.featured && <Tag>Featured</Tag>}
+                              {product.isNew && <Tag>New</Tag>}
+                            </div>
+                            <p className="text-neutral-400 text-xs truncate">
+                              /{product.slug}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <StatusPill status={product.status} />
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        ₱{product.price.toLocaleString("en-PH")}
+                        {product.compareAtPrice !== null && (
+                          <span className="text-neutral-400 text-xs line-through ml-1.5">
+                            ₱{product.compareAtPrice.toLocaleString("en-PH")}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        {product.stock === null ? (
+                          <span className="text-neutral-400" title="Stock not tracked">
+                            —
+                          </span>
+                        ) : (
+                          <span
+                            className={
+                              product.stock <= product.lowStockAt
+                                ? "text-red-600 font-semibold"
+                                : ""
+                            }
+                          >
+                            {product.stock}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 capitalize whitespace-nowrap">
+                        {product.category}
+                      </td>
+                      <td className="px-3 py-2 text-neutral-500 whitespace-nowrap">
+                        {new Date(product.updatedAt).toLocaleDateString("en-PH", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <details className="relative inline-block">
+                          <summary
+                            className="list-none cursor-pointer px-2 py-1 rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-black"
+                            aria-label={`Actions for ${product.name}`}
+                          >
+                            ⋯
+                          </summary>
+                          <div className="absolute right-0 z-20 mt-1 w-36 rounded-md border border-neutral-200 bg-white py-1 shadow-lg">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                closeDetails(e.currentTarget);
+                                setEditing(product);
+                                setIsNew(false);
+                              }}
+                              className="block w-full px-3 py-2 text-left text-xs hover:bg-neutral-50"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                closeDetails(e.currentTarget);
+                                toggleFeatured(product);
+                              }}
+                              className="block w-full px-3 py-2 text-left text-xs hover:bg-neutral-50"
+                            >
+                              {product.featured ? "Unfeature" : "Feature"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                closeDetails(e.currentTarget);
+                                handleDelete(product.id);
+                              }}
+                              className="block w-full px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </details>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
+
+            {filtered.length === 0 && (
+              <div className="py-16 text-center">
+                <p className="font-oswald text-2xl font-bold text-neutral-300 uppercase">
+                  {products.length === 0
+                    ? "No products yet"
+                    : "No products match these filters"}
+                </p>
+              </div>
+            )}
+
+            <div className="px-4 py-3 border-t border-neutral-100 text-xs text-neutral-500">
+              Showing {filtered.length} of {products.length} products
+            </div>
+          </div>
         </div>
+      )}
+
+      {showBulkEdit && !editing && !loading && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40"
+            onClick={() => setShowBulkEdit(false)}
+          />
+          <aside className="fixed top-0 right-0 z-50 h-full w-full max-w-xl bg-neutral-50 shadow-2xl overflow-y-auto">
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-white border-b border-neutral-200 px-5 py-4">
+              <div>
+                <h2 className="font-oswald text-lg font-bold uppercase">Bulk edit</h2>
+                <p className="text-neutral-500 text-sm mt-0.5">
+                  Apply changes to selected products or everything matching a filter.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBulkEdit(false)}
+                className="text-2xl leading-none text-neutral-400 hover:text-black"
+                aria-label="Close bulk edit"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-5">
+              <BulkEdit
+                products={products}
+                ids={markedIds}
+                categories={categories}
+                initialScope={markedIds.length > 0 ? "selected" : "matching"}
+                defaultScopeCategory={filterCategory}
+                defaultScopeStatus={filterStatus}
+                onDone={(updated, failed) => {
+                  setShowBulkEdit(false);
+                  flash(
+                    updated > 0
+                      ? `Updated ${updated} product${updated === 1 ? "" : "s"}${
+                          failed ? `, ${failed} failed` : ""
+                        }.`
+                      : "No products updated.",
+                    updated === 0 || failed > 0
+                  );
+                  load();
+                }}
+              />
+            </div>
+          </aside>
+        </>
       )}
     </div>
   );
+}
+
+function closeDetails(el: HTMLElement) {
+  el.closest("details")?.removeAttribute("open");
 }
 
 function StatusPill({ status }: { status: ProductStatus }) {
@@ -922,16 +1109,23 @@ function BulkEdit({
   products,
   ids,
   categories,
+  initialScope,
+  defaultScopeCategory,
+  defaultScopeStatus,
   onDone,
 }: {
   products: Product[];
   ids: string[];
   categories: Category[];
+  initialScope: "selected" | "matching";
+  defaultScopeCategory: string;
+  defaultScopeStatus: "" | ProductStatus;
   onDone: (updated: number, failed: number) => void;
 }) {
-  const [scope, setScope] = useState<"selected" | "matching">("selected");
-  const [scopeCategory, setScopeCategory] = useState("");
-  const [scopeStatus, setScopeStatus] = useState<"" | ProductStatus>("");
+  const [scope, setScope] = useState<"selected" | "matching">(initialScope);
+  const [scopeCategory, setScopeCategory] = useState(defaultScopeCategory);
+  const [scopeStatus, setScopeStatus] =
+    useState<"" | ProductStatus>(defaultScopeStatus);
   const [priceAction, setPriceAction] = useState<BulkPriceAction>("none");
   const [priceValue, setPriceValue] = useState("");
   const [compareAction, setCompareAction] = useState<"none" | "set" | "clear">("none");
