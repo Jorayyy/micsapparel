@@ -92,6 +92,12 @@ export async function PATCH(request: NextRequest) {
       }
       patch.stock = raw.stock as number | null;
     }
+    if (raw.badge !== undefined) {
+      if (raw.badge !== null && typeof raw.badge !== "string") {
+        return NextResponse.json({ error: "Invalid badge" }, { status: 400 });
+      }
+      patch.badge = raw.badge as string | null;
+    }
 
     let priceAdjust: { mode: "percent" | "amount"; value: number } | undefined;
     if (body.priceAdjust && body.priceAdjust.mode !== undefined) {

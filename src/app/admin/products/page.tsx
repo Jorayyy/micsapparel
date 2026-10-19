@@ -37,7 +37,26 @@ export default function AdminProducts() {
   const [marked, setMarked] = useState<string[]>([]);
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [showBulk, setShowBulk] = useState(false);
+  const [selectCategory, setSelectCategory] = useState("");
   const markedIds = marked.filter((id) => products.some((p) => p.id === id));
+  const categoryMatchCount = products.filter((p) => p.category === selectCategory).length;
+
+  function selectAll() {
+    if (products.length === 0) return;
+    if (
+      products.length > 10 &&
+      !confirm(`Select all ${products.length} products?`)
+    ) {
+      return;
+    }
+    setMarked(products.map((p) => p.id));
+  }
+
+  function selectCategoryProducts() {
+    setMarked(
+      products.filter((p) => p.category === selectCategory).map((p) => p.id)
+    );
+  }
 
   async function load() {
     setLoading(true);
@@ -225,13 +244,48 @@ export default function AdminProducts() {
       )}
 
       {!editing && (
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setShowBulk((v) => !v)}
             className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors"
           >
             {showBulk ? "Close Bulk Photos" : "Bulk Photos"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowBulkEdit((v) => !v)}
+            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors"
+          >
+            {showBulkEdit ? "Close Bulk Edit" : "Bulk Edit"}
+          </button>
+          <button
+            type="button"
+            onClick={selectAll}
+            disabled={products.length === 0}
+            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors disabled:opacity-50"
+          >
+            Select all ({products.length})
+          </button>
+          <select
+            value={selectCategory}
+            onChange={(e) => setSelectCategory(e.target.value)}
+            className={`${inputCls} w-auto min-w-[180px] py-2.5`}
+          >
+            <option value="">Select category…</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={selectCategoryProducts}
+            disabled={!selectCategory}
+            className="px-5 py-2.5 border border-neutral-300 text-xs tracking-widest uppercase hover:bg-neutral-50 transition-colors disabled:opacity-50"
+          >
+            Select category ({categoryMatchCount})
           </button>
         </div>
       )}
@@ -244,6 +298,28 @@ export default function AdminProducts() {
             load();
           }}
         />
+      )}
+
+      {!editing && !loading && showBulkEdit && (
+        <div className="mb-6">
+          <BulkEdit
+            products={products}
+            ids={markedIds}
+            categories={categories}
+            onDone={(updated, failed) => {
+              setShowBulkEdit(false);
+              flash(
+                updated > 0
+                  ? `Updated ${updated} product${updated === 1 ? "" : "s"}${
+                      failed ? `, ${failed} failed` : ""
+                    }.`
+                  : "No products updated.",
+                updated === 0 || failed > 0
+              );
+              load();
+            }}
+          />
+        </div>
       )}
 
       {editing ? (
@@ -291,24 +367,6 @@ export default function AdminProducts() {
                   </button>
                 </div>
               </div>
-              {showBulkEdit && (
-                <BulkEdit
-                  ids={markedIds}
-                  categories={categories}
-                  onDone={(updated, failed) => {
-                    setShowBulkEdit(false);
-                    flash(
-                      updated > 0
-                        ? `Updated ${updated} product${updated === 1 ? "" : "s"}${
-                            failed ? `, ${failed} failed` : ""
-                          }.`
-                        : "No products updated.",
-                      updated === 0 || failed > 0
-                    );
-                    load();
-                  }}
-                />
-              )}
             </div>
           )}
           {products.map((product) => (
@@ -861,14 +919,19 @@ type BulkPriceAction = "none" | "set" | "increase" | "decrease" | "add" | "subtr
 type BulkTriState = "" | "on" | "off";
 
 function BulkEdit({
+  products,
   ids,
   categories,
   onDone,
 }: {
+  products: Product[];
   ids: string[];
   categories: Category[];
   onDone: (updated: number, failed: number) => void;
 }) {
+  const [scope, setScope] = useState<"selected" | "matching">("selected");
+  const [scopeCategory, setScopeCategory] = useState("");
+  const [scopeStatus, setScopeStatus] = useState<"" | ProductStatus>("");
   const [priceAction, setPriceAction] = useState<BulkPriceAction>("none");
   const [priceValue, setPriceValue] = useState("");
   const [compareAction, setCompareAction] = useState<"none" | "set" | "clear">("none");
@@ -877,9 +940,22 @@ function BulkEdit({
   const [category, setCategory] = useState("");
   const [featured, setFeatured] = useState<BulkTriState>("");
   const [isNew, setIsNew] = useState<BulkTriState>("");
+  const [stockAction, setStockAction] = useState<"none" | "set" | "clear">("none");
   const [stock, setStock] = useState("");
+  const [badgeAction, setBadgeAction] = useState<"none" | "clear">("none");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  const targetIds =
+    scope === "selected"
+      ? ids
+      : products
+          .filter(
+            (p) =>
+              (!scopeCategory || p.category === scopeCategory) &&
+              (!scopeStatus || p.status === scopeStatus)
+          )
+          .map((p) => p.id);
 
   async function apply() {
     const patch: Record<string, unknown> = {};
@@ -914,10 +990,13 @@ function BulkEdit({
     if (category) patch.category = category;
     if (featured) patch.featured = featured === "on";
     if (isNew) patch.isNew = isNew === "on";
+    if (badgeAction === "clear") patch.badge = null;
 
-    if (stock !== "") {
+    if (stockAction === "clear") {
+      patch.stock = null;
+    } else if (stockAction === "set") {
       const value = Number(stock);
-      if (!Number.isInteger(value) || value < 0) {
+      if (stock.trim() === "" || !Number.isInteger(value) || value < 0) {
         setError("Stock must be a whole number, 0 or more.");
         return;
       }
@@ -928,21 +1007,39 @@ function BulkEdit({
       setError("Choose at least one change.");
       return;
     }
+    if (targetIds.length === 0) {
+      setError("No products match this scope.");
+      return;
+    }
 
     setBusy(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/products/bulk", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids, patch, priceAdjust }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Failed to update");
-        return;
+      let updated = 0;
+      let failed = 0;
+      for (let i = 0; i < targetIds.length; i += 500) {
+        const res = await fetch("/api/admin/products/bulk", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ids: targetIds.slice(i, i + 500),
+            patch,
+            priceAdjust,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(
+            `${data.error || "Failed to update"}${
+              i > 0 ? ` (${updated} updated before this batch)` : ""
+            }`
+          );
+          return;
+        }
+        updated += data.updated ?? 0;
+        failed += data.failed?.length ?? 0;
       }
-      onDone(data.updated ?? 0, data.failed?.length ?? 0);
+      onDone(updated, failed);
     } catch {
       setError("Connection error");
     } finally {
@@ -952,6 +1049,56 @@ function BulkEdit({
 
   return (
     <div className="bg-white border border-neutral-200 rounded-lg p-4 space-y-4">
+      <div className="border border-neutral-200 rounded-lg p-3">
+        <div className="grid sm:grid-cols-3 gap-3">
+          <Field label="Apply to">
+            <select
+              value={scope}
+              onChange={(e) => setScope(e.target.value as "selected" | "matching")}
+              className={inputCls}
+            >
+              <option value="selected">Selected ({ids.length})</option>
+              <option value="matching">All matching filters</option>
+            </select>
+          </Field>
+          {scope === "matching" && (
+            <>
+              <Field label="Filter: category">
+                <select
+                  value={scopeCategory}
+                  onChange={(e) => setScopeCategory(e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="">Any category</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Filter: current status">
+                <select
+                  value={scopeStatus}
+                  onChange={(e) => setScopeStatus(e.target.value as "" | ProductStatus)}
+                  className={inputCls}
+                >
+                  <option value="">Any status</option>
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </Field>
+            </>
+          )}
+        </div>
+        {scope === "matching" && (
+          <p className="text-xs text-neutral-500 mt-2">
+            {targetIds.length} product{targetIds.length === 1 ? "" : "s"} match.
+          </p>
+        )}
+      </div>
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <Field label="Price change">
           <select
@@ -1053,15 +1200,39 @@ function BulkEdit({
           </select>
         </Field>
         <Field label="Stock">
+          <select
+            value={stockAction}
+            onChange={(e) =>
+              setStockAction(e.target.value as "none" | "set" | "clear")
+            }
+            className={inputCls}
+          >
+            <option value="none">No change</option>
+            <option value="set">Set exact stock</option>
+            <option value="clear">Clear tracking</option>
+          </select>
+        </Field>
+        <Field label="Stock value">
           <input
             type="number"
             min={0}
             step={1}
             value={stock}
             onChange={(e) => setStock(e.target.value)}
-            placeholder="No change"
-            className={inputCls}
+            disabled={stockAction !== "set"}
+            placeholder={stockAction === "set" ? "0" : "—"}
+            className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
           />
+        </Field>
+        <Field label="Badge">
+          <select
+            value={badgeAction}
+            onChange={(e) => setBadgeAction(e.target.value as "none" | "clear")}
+            className={inputCls}
+          >
+            <option value="none">No change</option>
+            <option value="clear">Clear badge</option>
+          </select>
         </Field>
       </div>
 
@@ -1070,10 +1241,10 @@ function BulkEdit({
       <button
         type="button"
         onClick={apply}
-        disabled={busy}
+        disabled={busy || targetIds.length === 0}
         className="px-7 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
       >
-        {busy ? "Applying…" : `Apply to ${ids.length} selected`}
+        {busy ? "Applying…" : `Apply to ${targetIds.length}`}
       </button>
     </div>
   );
