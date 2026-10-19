@@ -281,12 +281,12 @@ export default function AdminProducts() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, slug or SKU"
-            className={`${inputCls} w-auto min-w-[220px] flex-1 max-w-sm`}
+            className={`${compactInputCls} min-w-[220px] flex-1 max-w-sm`}
           />
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className={`${inputCls} w-auto min-w-[150px]`}
+            className={`${compactInputCls} min-w-[140px]`}
           >
             <option value="">All categories</option>
             {categories.map((c) => (
@@ -298,7 +298,7 @@ export default function AdminProducts() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as "" | ProductStatus)}
-            className={`${inputCls} w-auto min-w-[130px]`}
+            className={`${compactInputCls} min-w-[130px]`}
           >
             <option value="">All statuses</option>
             <option value="active">Active</option>
@@ -308,7 +308,7 @@ export default function AdminProducts() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
-            className={`${inputCls} w-auto min-w-[130px]`}
+            className={`${compactInputCls} min-w-[120px]`}
           >
             <option value="newest">Newest</option>
             <option value="name">Name A–Z</option>
@@ -1091,6 +1091,9 @@ function ProductEditor({
 const inputCls =
   "w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-lg text-sm focus:outline-none focus:border-black focus:ring-2 focus:ring-black/5 transition-colors";
 
+const compactInputCls =
+  "px-3.5 py-2.5 bg-white border border-neutral-300 rounded-lg text-sm focus:outline-none focus:border-black focus:ring-2 focus:ring-black/5 transition-colors";
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
@@ -1587,7 +1590,7 @@ function BulkPhotos({
           <select
             value={activeCategory}
             onChange={(e) => setCategory(e.target.value)}
-            className={`${inputCls} min-w-[200px]`}
+            className={`${compactInputCls} min-w-[200px]`}
           >
             {categories.map((c) => (
               <option key={c.id} value={c.slug}>
