@@ -35,6 +35,7 @@ export default function AdminProducts() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [marked, setMarked] = useState<string[]>([]);
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const [showBulk, setShowBulk] = useState(false);
   const markedIds = marked.filter((id) => products.some((p) => p.id === id));
 
@@ -261,26 +262,53 @@ export default function AdminProducts() {
       ) : (
         <div className="space-y-3">
           {markedIds.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-lg bg-neutral-100">
-              <span className="text-sm text-neutral-600">
-                {markedIds.length} marked for deletion
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setMarked([])}
-                  className="px-4 py-2 text-xs border border-neutral-300 rounded-lg hover:bg-white transition-all tracking-widest uppercase"
-                >
-                  Clear
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDeleteMarked}
-                  className="px-4 py-2 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all tracking-widest uppercase"
-                >
-                  Delete marked ({markedIds.length})
-                </button>
+            <div className="px-4 py-3 rounded-lg bg-neutral-100 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="text-sm text-neutral-600">
+                  {markedIds.length} selected
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkEdit((v) => !v)}
+                    className="px-4 py-2 text-xs rounded-lg bg-black text-white hover:bg-neutral-800 transition-all tracking-widest uppercase"
+                  >
+                    {showBulkEdit ? "Close bulk edit" : "Bulk edit"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMarked([])}
+                    className="px-4 py-2 text-xs border border-neutral-300 rounded-lg hover:bg-white transition-all tracking-widest uppercase"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteMarked}
+                    className="px-4 py-2 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all tracking-widest uppercase"
+                  >
+                    Delete selected ({markedIds.length})
+                  </button>
+                </div>
               </div>
+              {showBulkEdit && (
+                <BulkEdit
+                  ids={markedIds}
+                  categories={categories}
+                  onDone={(updated, failed) => {
+                    setShowBulkEdit(false);
+                    flash(
+                      updated > 0
+                        ? `Updated ${updated} product${updated === 1 ? "" : "s"}${
+                            failed ? `, ${failed} failed` : ""
+                          }.`
+                        : "No products updated.",
+                      updated === 0 || failed > 0
+                    );
+                    load();
+                  }}
+                />
+              )}
             </div>
           )}
           {products.map((product) => (
@@ -290,7 +318,7 @@ export default function AdminProducts() {
                   type="checkbox"
                   checked={marked.includes(product.id)}
                   onChange={() => toggleMark(product.id)}
-                  aria-label={`Mark ${product.name} for deletion`}
+                  aria-label={`Select ${product.name}`}
                   className="w-4 h-4 accent-black shrink-0"
                 />
                 <div className="w-16 h-16 bg-neutral-100 rounded-md shrink-0 overflow-hidden">
@@ -825,6 +853,228 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
         {label}
       </label>
       {children}
+    </div>
+  );
+}
+
+type BulkPriceAction = "none" | "set" | "increase" | "decrease" | "add" | "subtract";
+type BulkTriState = "" | "on" | "off";
+
+function BulkEdit({
+  ids,
+  categories,
+  onDone,
+}: {
+  ids: string[];
+  categories: Category[];
+  onDone: (updated: number, failed: number) => void;
+}) {
+  const [priceAction, setPriceAction] = useState<BulkPriceAction>("none");
+  const [priceValue, setPriceValue] = useState("");
+  const [compareAction, setCompareAction] = useState<"none" | "set" | "clear">("none");
+  const [compareValue, setCompareValue] = useState("");
+  const [status, setStatus] = useState<"" | ProductStatus>("");
+  const [category, setCategory] = useState("");
+  const [featured, setFeatured] = useState<BulkTriState>("");
+  const [isNew, setIsNew] = useState<BulkTriState>("");
+  const [stock, setStock] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function apply() {
+    const patch: Record<string, unknown> = {};
+    let priceAdjust: { mode: "percent" | "amount"; value: number } | undefined;
+
+    if (priceAction !== "none") {
+      const value = Number(priceValue);
+      if (priceValue.trim() === "" || !Number.isFinite(value) || value < 0) {
+        setError("Enter a valid price value.");
+        return;
+      }
+      if (priceAction === "set") patch.price = value;
+      else if (priceAction === "increase") priceAdjust = { mode: "percent", value };
+      else if (priceAction === "decrease")
+        priceAdjust = { mode: "percent", value: -value };
+      else if (priceAction === "add") priceAdjust = { mode: "amount", value };
+      else priceAdjust = { mode: "amount", value: -value };
+    }
+
+    if (compareAction === "set") {
+      const value = Number(compareValue);
+      if (compareValue.trim() === "" || !Number.isFinite(value) || value < 0) {
+        setError("Enter a valid compare-at price.");
+        return;
+      }
+      patch.compareAtPrice = value;
+    } else if (compareAction === "clear") {
+      patch.compareAtPrice = null;
+    }
+
+    if (status) patch.status = status;
+    if (category) patch.category = category;
+    if (featured) patch.featured = featured === "on";
+    if (isNew) patch.isNew = isNew === "on";
+
+    if (stock !== "") {
+      const value = Number(stock);
+      if (!Number.isInteger(value) || value < 0) {
+        setError("Stock must be a whole number, 0 or more.");
+        return;
+      }
+      patch.stock = value;
+    }
+
+    if (!priceAdjust && Object.keys(patch).length === 0) {
+      setError("Choose at least one change.");
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/products/bulk", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, patch, priceAdjust }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to update");
+        return;
+      }
+      onDone(data.updated ?? 0, data.failed?.length ?? 0);
+    } catch {
+      setError("Connection error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="bg-white border border-neutral-200 rounded-lg p-4 space-y-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Field label="Price change">
+          <select
+            value={priceAction}
+            onChange={(e) => setPriceAction(e.target.value as BulkPriceAction)}
+            className={inputCls}
+          >
+            <option value="none">No change</option>
+            <option value="set">Set exact price (₱)</option>
+            <option value="increase">Increase by %</option>
+            <option value="decrease">Decrease by %</option>
+            <option value="add">Add amount (₱)</option>
+            <option value="subtract">Subtract amount (₱)</option>
+          </select>
+        </Field>
+        <Field label="Price value">
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={priceValue}
+            onChange={(e) => setPriceValue(e.target.value)}
+            disabled={priceAction === "none"}
+            placeholder={priceAction === "none" ? "—" : "0"}
+            className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
+          />
+        </Field>
+        <Field label="Compare-at price">
+          <select
+            value={compareAction}
+            onChange={(e) =>
+              setCompareAction(e.target.value as "none" | "set" | "clear")
+            }
+            className={inputCls}
+          >
+            <option value="none">No change</option>
+            <option value="set">Set price</option>
+            <option value="clear">Clear price</option>
+          </select>
+        </Field>
+        <Field label="Compare-at value (₱)">
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={compareValue}
+            onChange={(e) => setCompareValue(e.target.value)}
+            disabled={compareAction !== "set"}
+            placeholder={compareAction === "set" ? "0" : "—"}
+            className={`${inputCls} disabled:bg-neutral-100 disabled:text-neutral-400`}
+          />
+        </Field>
+        <Field label="Status">
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as "" | ProductStatus)}
+            className={inputCls}
+          >
+            <option value="">No change</option>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </Field>
+        <Field label="Category">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className={inputCls}
+          >
+            <option value="">No change</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Featured">
+          <select
+            value={featured}
+            onChange={(e) => setFeatured(e.target.value as BulkTriState)}
+            className={inputCls}
+          >
+            <option value="">No change</option>
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
+        </Field>
+        <Field label="New arrival">
+          <select
+            value={isNew}
+            onChange={(e) => setIsNew(e.target.value as BulkTriState)}
+            className={inputCls}
+          >
+            <option value="">No change</option>
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
+        </Field>
+        <Field label="Stock">
+          <input
+            type="number"
+            min={0}
+            step={1}
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            placeholder="No change"
+            className={inputCls}
+          />
+        </Field>
+      </div>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
+
+      <button
+        type="button"
+        onClick={apply}
+        disabled={busy}
+        className="px-7 py-3 bg-black text-white font-oswald text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-colors disabled:opacity-50"
+      >
+        {busy ? "Applying…" : `Apply to ${ids.length} selected`}
+      </button>
     </div>
   );
 }
